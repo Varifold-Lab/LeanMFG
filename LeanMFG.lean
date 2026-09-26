@@ -12,3 +12,6 @@ import LeanMFG.Verification.FiniteState.OneStep
 import LeanMFG.Examples.Static.RockPaperScissors
 import LeanMFG.Examples.Continuous.HJB
 import LeanMFG.Examples.FiniteState.LeftRight
+import LeanMFG.Model.Static.Basic
+import LeanMFG.Model.Static.RockPaperScissorsAdapter
+import LeanMFG.Examples.Static.Congestion
