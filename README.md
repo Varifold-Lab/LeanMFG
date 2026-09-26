@@ -1,25 +1,14 @@
 # LeanMFG
 
-**Mean field games: formal theory and verified algorithms in Lean 4.**
+**Mean field games in Lean 4: models, mathematics, executable algorithms, and verified examples.**
 
-LeanMFG aims to formalize the mathematics of mean field games and connect executable algorithms with machine-checked proofs. Its scope includes models, equilibrium concepts, and the correctness and convergence of numerical methods.
+LeanMFG connects these layers through a proof chain:
 
-The project is in early development and builds on mathlib. Its first complete
-example is a static rock-paper-scissors mean field game.
-The [deterministic control model](LeanMFG/Model/DeterministicControl.lean)
-separately defines real-valued paths, controls, and costs.
-The [HJB classical solution module](LeanMFG/Theory/HJB/ClassicalSolution.lean)
-states the corresponding equation and verifies a smooth quadratic solution
-for zero potential and quadratic terminal cost.
-The [verification theorem](LeanMFG/Verification/HJB.lean) proves a lower
-bound on path costs and optimality when a control follows `a = -∂ₓu`.
-It states interval integrability of the value derivative as an explicit
-hypothesis for the fundamental theorem of calculus.
-The [quadratic example](LeanMFG/Examples/HJB.lean) constructs the feedback
-path, proves that integrability condition for every admissible path in this
-problem, and certifies the feedback path's optimality.
+> Model definitions → mathematical properties → algorithms → algorithm guarantees → application constraints.
 
-## Quick start
+The library is in early development. Its current cases are a [static rock-paper-scissors game](docs/app/docs/examples/rock-paper-scissors/page.mdx), a [one-step finite-state game](docs/app/docs/examples/finite-state-left-right/page.mdx) with a mass-conserving population update, and a [classical HJB verification example](docs/app/docs/examples/hjb/page.mdx) for deterministic control. These examples establish specific results under stated assumptions; they do not yet form a general MFG solver.
+
+## Build
 
 Install [elan](https://github.com/leanprover/elan), then run:
 
@@ -28,45 +17,18 @@ lake exe cache get
 lake build
 ```
 
-The Lean version and mathlib revision are pinned in `lean-toolchain` and
-`lakefile.toml`. The cache command obtains mathlib's precompiled files.
-`lake build` also runs the executable example checks.
+The Lean toolchain and mathlib revision are pinned in this repository. `lake build` checks the proofs and executable `#guard` examples.
 
-## Example
+## Documentation
 
-Open the [HTML guide](docs/rock-paper-scissors.html) locally for a worked
-explanation of the model, algorithm, and proofs. A
-[Markdown version](docs/rock-paper-scissors.md) is also available.
+The official documentation is a Next.js + MDX site in `docs/`:
 
-## Code organization
+```sh
+cd docs
+npm ci
+npm run dev
+```
 
-The layout follows the separation of models, algorithms, and proofs used by
-[LeanSort](https://github.com/Varifold-Lab/LeanSort), with a separate layer for
-mathematical MFG theory:
+Open `http://localhost:3000`. Run `npm run build` to check the pages and produce a static site. The [architecture](docs/app/docs/architecture/page.mdx) and [references](docs/app/docs/references/page.mdx) are maintained there.
 
-| Directory | Responsibility |
-| --- | --- |
-| `LeanMFG/Model/` | Games, distributions, control problems, and admissible paths |
-| `LeanMFG/Theory/` | Mathematical results such as existence and uniqueness |
-| `LeanMFG/Algorithm/` | Executable solvers and numerical methods |
-| `LeanMFG/Verification/` | Verification theorems and algorithm correctness proofs |
-
-`LeanMFG.lean` imports every current module, including examples, so
-`lake build` checks the whole library. Concrete modules should import the
-mathlib files they need directly.
-
-## Related libraries
-
-- [MFGLib](https://github.com/radar-research-lab/MFGLib) — a Python library
-  for defining and solving mean field games. It includes a rock-paper-scissors
-  environment with a different reward rule from LeanMFG's static example.
-
-## References
-
-- Pierre Cardaliaguet. [*A Short Course on Mean Field Games*](https://www.ceremade.dauphine.fr/~cardaliaguet/MFGcours2018.pdf). March 31, 2018.
-- Jean-Michel Lasry and Pierre-Louis Lions. [*Mean Field Games*](https://doi.org/10.1007/s11537-007-0657-8). Japanese Journal of Mathematics, 2, 229–260, 2007.
-- René Carmona and François Delarue. [*Probabilistic Theory of Mean Field Games with Applications I: Mean Field FBSDEs, Control, and Games*](https://doi.org/10.1007/978-3-319-58920-6). Springer, 2018.
-- Yves Achdou and Italo Capuzzo-Dolcetta. [*Mean Field Games: Numerical Methods*](https://doi.org/10.1137/090758477). SIAM Journal on Numerical Analysis, 48(3), 1136–1162, 2010.
-- Saeed Hadikhanloo and Francisco J. Silva. [*Finite Mean Field Games: Fictitious Play and Convergence to a First Order Continuous Mean Field Game*](https://arxiv.org/abs/1805.05940). Journal de Mathématiques Pures et Appliquées, 132, 369–397, 2019.
-- Mathieu Laurière et al. [*Learning in Mean Field Games: A Survey*](https://arxiv.org/abs/2205.12944). arXiv:2205.12944, 2022.
-- Xin Guo, Anran Hu, Matteo Santamaria, Mahan Tajrobehkar, and Junzi Zhang. [*MFGLib: A Library for Mean-Field Games*](https://arxiv.org/abs/2304.08630). arXiv:2304.08630, 2023.
+Contributions are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md). LeanMFG is licensed under [Apache-2.0](LICENSE).

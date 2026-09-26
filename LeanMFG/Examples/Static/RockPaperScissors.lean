@@ -1,4 +1,4 @@
-import LeanMFG.Verification.RockPaperScissors
+import LeanMFG.Verification.Static.RockPaperScissors
 
 namespace LeanMFG.RPS
 

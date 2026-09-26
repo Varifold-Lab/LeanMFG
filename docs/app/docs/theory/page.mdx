@@ -1,0 +1,22 @@
+import { SourceLink } from '@/components/SourceLink'
+
+# Theory
+
+Theory modules state the mathematical properties against which algorithms and examples are checked.
+
+## Static equilibrium
+
+In <SourceLink path="LeanMFG/Theory/Static/RockPaperScissors.lean">rock-paper-scissors theory</SourceLink>, an exact equilibrium is a population mix `m` for which no rational personal mix `p` has higher reward against fixed `m`. An ε-equilibrium adds `ε ≥ 0` and permits improvement by at most ε. The proof shows that the uniform mix is the only exact equilibrium for the chosen win/loss signs.
+
+## Classical HJB equation
+
+The <SourceLink path="LeanMFG/Theory/Continuous/HJB/ClassicalSolution.lean">classical solution</SourceLink> structure records a smooth value candidate, its time and space derivatives, the HJB equation, and terminal condition. For dynamics `x' = a` and cost `a²/2 + F(t,x)`, the equation is
+
+$$
+\partial_t u(t,x) - \frac{(\partial_x u(t,x))^2}{2} + F(t,x) = 0,
+\qquad u(1,x)=g(x).
+$$
+
+An explicit quadratic candidate satisfies these conditions. The separate [verification theorem](/docs/verification) turns this equation check into a lower bound on every admissible path's cost.
+
+The current finite-state layer defines its equilibrium notion in the [model module](/docs/model) because the one-step game and its admissible policies are introduced together.

@@ -1,0 +1,78 @@
+import { SourceLink } from '@/components/SourceLink'
+
+# Static rock-paper-scissors
+
+One population distribution, one representative player, and an executable certificate for the most that player can gain by changing strategy.
+
+This example is inspired by §2.1, Example 2 of [*Learning in Mean Field Games: A Survey*](https://arxiv.org/abs/2205.12944). It uses the everyday convention: a win earns `+1`, a loss earns `−1`, and a tie earns `0`. The survey displays the opposite cyclic reward signs, so the formulas below are **not** transcribed from its payoff formulas.
+
+## Model
+
+The action set is Rock, Paper, Scissors. A <SourceLink path="LeanMFG/Model/Static/RockPaperScissors.lean">distribution</SourceLink> stores rational probabilities, proof that each is nonnegative, and proof that their sum is one:
+
+$$
+m_R,m_P,m_S \in \mathbb{Q}_{\geq 0},
+\qquad m_R+m_P+m_S=1.
+$$
+
+The personal mix `p` and population mix `m` have the same type but different roles. A unilateral deviation changes `p` while `m` remains fixed. Pure-action rewards are
+
+$$
+\begin{aligned}
+r(R,m)&=m_S-m_P,\\
+r(P,m)&=m_R-m_S,\\
+r(S,m)&=m_P-m_R.
+\end{aligned}
+$$
+
+The player's expected reward is
+
+$$
+J(p;m)=\sum_{a\in\{R,P,S\}}p_a r(a,m).
+$$
+
+## Equilibrium
+
+At an exact equilibrium, no rational personal mix improves the reward against fixed `m`:
+
+$$
+\forall p,\qquad J(p;m)\leq J(m;m).
+$$
+
+An ε-equilibrium requires `ε ≥ 0` and permits improvement of at most ε:
+
+$$
+\forall p,\qquad J(p;m)\leq J(m;m)+\varepsilon.
+$$
+
+Population consistency is exact: the representative strategy being certified is `m` itself. The first version quantifies over **rational** mixed strategies.
+
+## Executable certificate
+
+<SourceLink path="LeanMFG/Algorithm/Static/RockPaperScissors.lean"><code>bestResponse m</code></SourceLink> compares the three pure rewards and returns a maximizer. Ties favor Rock, then Paper, then Scissors. Exploitability is
+
+$$
+\operatorname{exploitability}(m)
+=r(\operatorname{bestResponse}(m),m)-J(m;m).
+$$
+
+The Boolean `checkEpsilonEquilibrium m ε` accepts exactly when `ε ≥ 0` and exploitability is at most ε.
+
+## What Lean proves
+
+The <SourceLink path="LeanMFG/Verification/Static/RockPaperScissors.lean">verification theorems</SourceLink> show that the **actual executable** `bestResponse` returns a maximizing action; every rational mixed strategy scores no higher; exploitability is nonnegative; and the Boolean checker accepts if and only if the quantified ε-equilibrium definition holds.
+
+The <SourceLink path="LeanMFG/Theory/Static/RockPaperScissors.lean">theory module</SourceLink> shows self-play has reward zero. At equilibrium, each pure reward is at most zero; the three rewards sum to zero, so all three are zero. Combined with total mass one, this forces `m_R = m_P = m_S = 1/3`. Lean proves that the uniform mix is an equilibrium and that it is the unique exact equilibrium.
+
+## Worked checks
+
+The <SourceLink path="LeanMFG/Examples/Static/RockPaperScissors.lean">example module</SourceLink> uses executable `#guard` commands. They run during `lake build`.
+
+| Population `(R, P, S)` | Best response | Exploitability | Result |
+| --- | --- | --- | --- |
+| `(1/3, 1/3, 1/3)` | Rock, by tie order | `0` | Exact equilibrium |
+| `(1, 0, 0)` | Paper | `1` | Pure Rock can be exploited |
+| `(1/2, 3/10, 1/5)` | Paper | `3/10` | Accept ε = `3/10`; reject ε = `1/5` |
+| `(1/3, 2/3, 0)` | Paper, tied with Scissors | — | Tie order check |
+
+The uniform mix is rejected for negative ε. This case certifies best responses and equilibria in a three-action static game. It does not implement equilibrium iteration or cover dynamic MFGs.

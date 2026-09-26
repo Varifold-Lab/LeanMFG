@@ -1,0 +1,30 @@
+# Getting started
+
+LeanMFG is a Lean 4 library built against a pinned mathlib revision. The documentation is a separate Next.js application whose content is written in MDX.
+
+## Check the Lean library
+
+Install [elan](https://github.com/leanprover/elan), then run from the repository root:
+
+```sh
+lake exe cache get
+lake build
+```
+
+The cache command downloads precompiled mathlib artifacts. `lake build` checks the theorem proofs and evaluates the executable `#guard` examples. A failed guard fails the build.
+
+## Run this documentation locally
+
+Node.js 20.9 or newer is required. From the repository root:
+
+```sh
+cd docs
+npm ci
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000). `npm run build` checks the MDX pages and produces a static site in `docs/out/`; `npm run typecheck` checks TypeScript.
+
+The documentation navigation follows the library's [Model](/docs/model), [Theory](/docs/theory), [Algorithm](/docs/algorithm), [Verification](/docs/verification), and worked example layers. A source link in an MDX page is checked against the local Lean file during the documentation build, so a moved module cannot silently leave a stale source link.
+
+The site is configured for static export. For hosting under a repository subpath such as `/LeanMFG`, set `NEXT_PUBLIC_BASE_PATH=/LeanMFG` when building. Publishing and hosting are separate from the local build.

@@ -1,4 +1,4 @@
-import LeanMFG.Model.RockPaperScissors
+import LeanMFG.Model.Static.RockPaperScissors
 
 namespace LeanMFG.RPS
 

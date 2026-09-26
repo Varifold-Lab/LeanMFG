@@ -1,4 +1,4 @@
-import LeanMFG.Theory.HJB.ClassicalSolution
+import LeanMFG.Theory.Continuous.HJB.ClassicalSolution
 import Mathlib.Analysis.Calculus.Deriv.Comp
 import Mathlib.Analysis.Calculus.Deriv.Prod
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus

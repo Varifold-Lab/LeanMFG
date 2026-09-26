@@ -1,4 +1,4 @@
-import LeanMFG.Verification.HJB
+import LeanMFG.Verification.Continuous.HJB
 
 /-!
 # Quadratic HJB verification example

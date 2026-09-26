@@ -1,0 +1,21 @@
+import { SourceLink } from '@/components/SourceLink'
+
+# Model
+
+Model modules define the objects that appear in mathematical statements and executable programs. They record admissibility conditions so later theorems can use them directly.
+
+## Static distributions
+
+The rock-paper-scissors <SourceLink path="LeanMFG/Model/Static/RockPaperScissors.lean">model</SourceLink> has three actions and rational mixed strategies. The `Distribution` structure carries proofs that every probability is nonnegative and the three probabilities sum to one. The representative player's strategy `p` and population distribution `m` have the same type but separate roles: a unilateral deviation changes `p` while `m` stays fixed.
+
+## Finite-state dynamics
+
+The <SourceLink path="LeanMFG/Model/FiniteState/OneStep.lean">finite-state model</SourceLink> defines a rational distribution on any finite type, a policy assigning an action distribution to each state, and normalized stochastic transitions. Its `update` operator computes the next population law. `evolve` repeats the update for a sequence of policies. The game also specifies stage and terminal rewards.
+
+See [Verification](/docs/verification) for the conservation proof, which uses the actual update rule.
+
+## Continuous control
+
+The <SourceLink path="LeanMFG/Model/Continuous/DeterministicControl.lean">deterministic control model</SourceLink> uses real-valued time, state, and control. Time ends at `1`, dynamics are `x' = a`, and the running cost is kinetic effort plus an exogenous potential. `AdmissiblePath` records its initial state, derivative relation, continuity of the control, and integrability of the running cost.
+
+This control problem is a component useful for MFG theory; it does not yet couple a population evolution equation to the HJB equation.

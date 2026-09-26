@@ -1,5 +1,5 @@
-import LeanMFG.Algorithm.RockPaperScissors
-import LeanMFG.Theory.RockPaperScissors
+import LeanMFG.Algorithm.Static.RockPaperScissors
+import LeanMFG.Theory.Static.RockPaperScissors
 
 namespace LeanMFG.RPS
 

@@ -1,0 +1,26 @@
+import { SourceLink } from '@/components/SourceLink'
+
+# Finite-state Left/Right
+
+A one-decision mean field game built on a reusable finite-state model. The worked example follows the Left/Right environment in the [MFGLib Quickstart](https://mfglib.readthedocs.io/en/stable/quickstart.html), using rational probabilities for exact Lean computation.
+
+Everyone starts in the central state. Action Left moves an agent to the left state; action Right moves her to the right state. Against a fixed terminal population law `m`, payoffs are
+
+$$
+r(\mathrm{Left},m)=-m(\mathrm{Left}),
+\qquad r(\mathrm{Right},m)=-2m(\mathrm{Right}).
+$$
+
+## Model and population update
+
+A <SourceLink path="LeanMFG/Model/FiniteState/OneStep.lean">policy</SourceLink> assigns a rational action distribution to each state. `inducedTerminal` computes the population law produced by the candidate policy. `value G π m` evaluates one individual's policy `π` against a **fixed** `m`, including when that individual deviates. The model permits stochastic transitions, stage rewards, and terminal rewards.
+
+The shared `update` operator takes a current distribution and policy. The <SourceLink path="LeanMFG/Verification/FiniteState/Conservation.lean">conservation theorems</SourceLink> prove from its weighted transition sums that all destination masses stay nonnegative and their total remains one. `evolve` repeats the update for any policy sequence, with the same guarantee at every step. The assumptions are normalized transitions and a closed population; equilibrium is not required.
+
+## Best response and equilibrium check
+
+The <SourceLink path="LeanMFG/Algorithm/FiniteState/OneStep.lean">algorithm</SourceLink> selects a maximizing action in each state, computes exploitability, and checks ε-equilibrium. Its <SourceLink path="LeanMFG/Verification/FiniteState/OneStep.lean">proofs</SourceLink> establish that the selected action is optimal, no mixed policy scores higher against the fixed population, exploitability is nonnegative, and the Boolean checker is equivalent to the quantified equilibrium definition.
+
+In the <SourceLink path="LeanMFG/Examples/FiniteState/LeftRight.lean">worked example</SourceLink>, everyone chooses Left with probability `2/3` and Right with probability `1/3`. The terminal population has the same left/right masses, so both actions score `−2/3`. The policy is proved to be an exact equilibrium. If everyone chooses Left, deviating Right improves payoff by `1`.
+
+Run `lake build` for the general proofs and executable `#guard` checks. This game has one decision and one transition. Its reusable population update accepts multiple steps, but a multistep Bellman equilibrium solver and continuous-state population flow are not implemented here.

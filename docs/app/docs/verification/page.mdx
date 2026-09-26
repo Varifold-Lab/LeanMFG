@@ -1,0 +1,21 @@
+import { SourceLink } from '@/components/SourceLink'
+
+# Verification
+
+Verification modules connect executable definitions and mathematical specifications.
+
+## Equilibrium certificates
+
+For rock-paper-scissors, <SourceLink path="LeanMFG/Verification/Static/RockPaperScissors.lean">the proofs</SourceLink> show that the actual `bestResponse` program returns a maximizing action, every rational mixed strategy scores no higher, exploitability is nonnegative, and the Boolean checker accepts exactly the defined ε-equilibria.
+
+For the one-step finite-state game, <SourceLink path="LeanMFG/Verification/FiniteState/OneStep.lean">the analogous proofs</SourceLink> establish maximizing actions, an optimal best-response policy, nonnegative exploitability, and checker equivalence.
+
+## Population conservation
+
+<SourceLink path="LeanMFG/Verification/FiniteState/Conservation.lean">Conservation theorems</SourceLink> prove directly from the weighted transition sums that every destination mass is nonnegative and total mass remains one. They also prove these properties after any number of updates under any admissible policy sequence. No equilibrium assumption is needed; normalized transitions and a closed population are needed.
+
+## HJB verification
+
+<SourceLink path="LeanMFG/Verification/Continuous/HJB.lean">The classical verification theorem</SourceLink> gives every admissible path a lower cost bound from the HJB candidate. A path following the minimizing feedback `a = -∂ₓu` attains the bound and is optimal. Interval integrability of the derivative along a path is an explicit hypothesis of the general theorem. The [quadratic example](/docs/examples/hjb) proves that hypothesis for its paths.
+
+Run `lake build` at the repository root to check all these proofs and the executable `#guard` examples.

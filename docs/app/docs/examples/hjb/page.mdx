@@ -1,0 +1,39 @@
+import { SourceLink } from '@/components/SourceLink'
+
+# Classical HJB verification
+
+This case formalizes a deterministic optimal-control component of continuous mean field game theory. It is separate from the finite rock-paper-scissors and Left/Right examples.
+
+## Control problem
+
+The <SourceLink path="LeanMFG/Model/Continuous/DeterministicControl.lean">model</SourceLink> fixes a terminal time `1`. Starting from `(t₀,x₀)`, an admissible real-valued control `a` and state path `x` satisfy `x'(s)=a(s)`. With running potential `F` and terminal cost `g`, total cost is
+
+$$
+J(a)=\int_{t_0}^{1}\left(\frac{a(s)^2}{2}+F(s,x(s))\right)\,ds+g(x(1)).
+$$
+
+The admissible-path structure records a continuous control, differentiable state, and integrability of the running cost.
+
+## Equation and verification
+
+A <SourceLink path="LeanMFG/Theory/Continuous/HJB/ClassicalSolution.lean">classical solution</SourceLink> satisfies
+
+$$
+\partial_t u-\frac{(\partial_x u)^2}{2}+F=0,
+\qquad u(1,x)=g(x).
+$$
+
+The <SourceLink path="LeanMFG/Verification/Continuous/HJB.lean">verification theorem</SourceLink> proves that a candidate satisfying this equation gives a lower bound on the cost of any admissible path. When a path follows the feedback `a=-∂ₓu`, its cost attains the bound and it is optimal. The general theorem states interval integrability of the value derivative along paths as an explicit hypothesis for the fundamental theorem of calculus.
+
+## Quadratic example
+
+Take `F=0` and `g(x)=x²/2`. The smooth candidate and its feedback are
+
+$$
+u(t,x)=\frac{x^2}{2(2-t)},
+\qquad a(t,x)=-\frac{x}{2-t}.
+$$
+
+For an initial state `(t₀,x₀)`, the <SourceLink path="LeanMFG/Examples/Continuous/HJB.lean">example</SourceLink> constructs the explicit trajectory with constant control `a=-x₀/(2-t₀)`, proves the required integrability for every admissible path in this problem, and certifies that the feedback trajectory is optimal.
+
+This is a deterministic control verification result. It does not yet include a population-dependent potential, a forward population equation, or a coupled MFG equilibrium theorem.

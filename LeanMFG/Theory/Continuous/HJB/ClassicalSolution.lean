@@ -1,4 +1,4 @@
-import LeanMFG.Model.DeterministicControl
+import LeanMFG.Model.Continuous.DeterministicControl
 import Mathlib.Analysis.Calculus.ContDiff.Operations
 import Mathlib.Analysis.Calculus.Deriv.Add
 import Mathlib.Analysis.Calculus.Deriv.Inv

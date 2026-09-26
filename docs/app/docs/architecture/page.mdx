@@ -1,0 +1,35 @@
+# Architecture
+
+LeanMFG is a formal library connecting mean field game theory, executable algorithms, and application models. A completed case should make its assumptions explicit and connect as many parts of this chain as it actually proves:
+
+> Model definitions → mathematical properties → algorithms → algorithm guarantees → application constraints.
+
+## Code layers
+
+The first directory level describes a module's role. Within each layer, modules are grouped by mathematical setting: `Static/`, `FiniteState/`, or `Continuous/`.
+
+| Layer | Responsibility |
+| --- | --- |
+| [Model](/docs/model) | States, actions, distributions, costs, dynamics, and admissibility |
+| [Theory](/docs/theory) | Equilibrium concepts, equations, and mathematical results |
+| [Algorithm](/docs/algorithm) | Executable best responses, updates, and checks |
+| [Verification](/docs/verification) | Proofs about algorithms, optimality, and invariants |
+| [Examples](/docs/examples/rock-paper-scissors) | Concrete models with proved or executable checks |
+
+`LeanMFG.lean` imports every current module, including examples. Running `lake build` therefore checks the complete library.
+
+## Mathematical scope
+
+General theory can include equilibrium, best responses, dynamic models, HJB equations, and population evolution. Existence, uniqueness, and optimality each require stated hypotheses. An executable solver additionally needs a proof connecting its result to the mathematical definition; convergence and error bounds are separate claims.
+
+Applications can add finance, energy, transport, or other settings once their agents, states, actions, population dependence, and objective are specified. Transformer and DeFi are possible application directions, not existing MFG models in this library.
+
+Application requirements have different logical roles. **Population mass conservation** is an invariant of the finite-state update under normalized transitions. **Market clearing** may instead be an equilibrium constraint. **Solvency** needs its own assumptions and proof. We state each property in the form that matches its model.
+
+## Current results and boundaries
+
+- The [static rock-paper-scissors case](/docs/examples/rock-paper-scissors) certifies an executable checker and proves that the uniform rational distribution is the unique exact equilibrium.
+- The [finite-state case](/docs/examples/finite-state-left-right) proves mass conservation for any sequence of admissible policies and normalized transitions. Its Left/Right game has a verified exact equilibrium.
+- The [deterministic HJB case](/docs/examples/hjb) proves a classical verification theorem and an optimal feedback path for one explicit control problem.
+
+These results do not establish a general iterative MFG solver or a coupled HJB–population system. A future bridge from continuous real-valued theory to grid or floating-point computation will need a formal approximation or numerical error result.
