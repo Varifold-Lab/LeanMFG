@@ -1,44 +1,84 @@
 # Static rock-paper-scissors
 
-For a worked, visual explanation, open the
+For a worked visual explanation, open the
 [standalone HTML guide](rock-paper-scissors.html) in a browser.
 
 This Lean example is inspired by the static rock-paper-scissors mean field game
-in Section 2.1, Example 2 of [*Learning in Mean Field Games: A Survey*](https://arxiv.org/abs/2205.12944).
-It uses the everyday win/loss convention: a win earns 1, a loss earns -1, and a
-tie earns 0. The survey displays the opposite cyclic reward signs, so the
-formulas below are **not** a transcription of its payoff formulas.
+in §2.1, Example 2 of
+[*Learning in Mean Field Games: A Survey*](https://arxiv.org/abs/2205.12944).
+We use the everyday convention: a win earns $1$, a loss earns $-1$, and a tie
+earns $0$. The survey displays the opposite cyclic reward signs, so the
+formulas here are **not** transcribed from its payoff formulas.
 
-The action set is Rock, Paper, Scissors. A distribution stores three rational
-probabilities, proofs that each is nonnegative, and a proof that their sum is 1.
-Both the representative player's strategy `p` and the population distribution
-`m` use this type. The population remains fixed when the individual deviates:
+## Model
 
-`reward Rock m = m(Scissors) - m(Paper)`
+The action set is $A=\{R,P,S\}$. A distribution stores rational probabilities
+with proof fields enforcing
 
-`reward Paper m = m(Rock) - m(Scissors)`
+$$
+m_R,m_P,m_S\in\mathbb{Q}_{\geq 0},
+\qquad m_R+m_P+m_S=1.
+$$
 
-`reward Scissors m = m(Paper) - m(Rock)`
+The representative player's mixed strategy $p$ and the population distribution
+$m$ have the same type but distinct roles. When one player deviates, $p$ changes
+while $m$ stays fixed. The pure-action rewards are
 
-`expectedReward p m = ∑ a, p(a) * reward a m`
+$$
+\begin{aligned}
+r(R,m)&=m_S-m_P,\\
+r(P,m)&=m_R-m_S,\\
+r(S,m)&=m_P-m_R.
+\end{aligned}
+$$
 
-Exact equilibrium means `expectedReward p m ≤ expectedReward m m` for every
-rational mixed strategy `p`. An ε-equilibrium additionally requires `ε ≥ 0`
-and allows the deviator to improve by at most `ε`. Population consistency is
-exact in both definitions, since the representative strategy is `m`.
+The player's expected reward is the finite sum
 
-The executable `bestResponse` maximizes pure-action reward. Its tie order is
-Rock, then Paper, then Scissors. `exploitability m` is that maximum minus
-`expectedReward m m`. The Boolean checker accepts exactly when `ε ≥ 0` and
-`exploitability m ≤ ε`. The Lean proofs show that this equals the quantified
-ε-equilibrium definition, including all rational mixed deviations.
+$$
+J(p;m)=\sum_{a\in A}p_a\,r(a,m).
+$$
 
-Run `lake build` to check the proofs and the executable `#guard` examples in
-`LeanMFG/Examples/RockPaperScissors.lean`. They cover the uniform population,
-all Rock, the distribution `(1/2, 3/10, 1/5)`, both ε thresholds, ties, and
-negative ε. The uniform distribution is proved to be the unique exact
-equilibrium among rational distributions.
+An exact equilibrium satisfies
+
+$$
+\forall p,\quad J(p;m)\leq J(m;m).
+$$
+
+An $\varepsilon$-equilibrium requires $\varepsilon\geq 0$ and
+
+$$
+\forall p,\quad J(p;m)\leq J(m;m)+\varepsilon.
+$$
+
+The quantifier ranges over **rational** mixed strategies. Population
+consistency is exact in both definitions because the representative strategy
+being certified is $m$ itself.
+
+## Algorithm and proofs
+
+The executable bestResponse compares the three pure rewards and returns a
+maximizer; ties favor Rock, then Paper, then Scissors. Exploitability is
+
+$$
+\operatorname{exploitability}(m)
+=r(\operatorname{bestResponse}(m),m)-J(m;m).
+$$
+
+The Boolean checkEpsilonEquilibrium accepts exactly when $\varepsilon\geq 0$
+and $\operatorname{exploitability}(m)\leq\varepsilon$. Lean proves that
+bestResponse maximizes reward over pure actions, that no rational mixed
+strategy beats it, that exploitability is nonnegative, and that the Boolean
+check is equivalent to the quantified $\varepsilon$-equilibrium definition.
+Lean also proves that $(1/3,1/3,1/3)$ is the unique exact equilibrium.
+
+Run **lake build** to verify these proofs and the executable checks in
+[the example module](../LeanMFG/Examples/RockPaperScissors.lean). They cover
+the uniform population (exploitability $0$), all Rock (best response Paper,
+exploitability $1$), and $(1/2,3/10,1/5)$ (best response Paper,
+exploitability $3/10$). The last distribution is accepted at
+$\varepsilon=3/10$ and rejected at $\varepsilon=1/5$. Further checks cover
+ties and negative $\varepsilon$.
 
 This example certifies best responses and equilibria in a three-action static
-game. It does not implement an iterative equilibrium solver or establish
-convergence of an iteration, and it does not cover dynamic MFGs.
+game. It does not implement an iterative equilibrium solver, prove iteration
+convergence, or cover dynamic MFGs.
