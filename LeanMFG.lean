@@ -1,5 +1,9 @@
 import LeanMFG.Model.RockPaperScissors
+import LeanMFG.Model.DeterministicControl
 import LeanMFG.Algorithm.RockPaperScissors
 import LeanMFG.Theory.RockPaperScissors
+import LeanMFG.Theory.HJB.ClassicalSolution
 import LeanMFG.Verification.RockPaperScissors
+import LeanMFG.Verification.HJB
 import LeanMFG.Examples.RockPaperScissors
+import LeanMFG.Examples.HJB

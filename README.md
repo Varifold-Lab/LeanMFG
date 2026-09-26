@@ -6,6 +6,18 @@ LeanMFG aims to formalize the mathematics of mean field games and connect execut
 
 The project is in early development and builds on mathlib. Its first complete
 example is a static rock-paper-scissors mean field game.
+The [deterministic control model](LeanMFG/Model/DeterministicControl.lean)
+separately defines real-valued paths, controls, and costs.
+The [HJB classical solution module](LeanMFG/Theory/HJB/ClassicalSolution.lean)
+states the corresponding equation and verifies a smooth quadratic solution
+for zero potential and quadratic terminal cost.
+The [verification theorem](LeanMFG/Verification/HJB.lean) proves a lower
+bound on path costs and optimality when a control follows `a = -∂ₓu`.
+It states interval integrability of the value derivative as an explicit
+hypothesis for the fundamental theorem of calculus.
+The [quadratic example](LeanMFG/Examples/HJB.lean) constructs the feedback
+path, proves that integrability condition for every admissible path in this
+problem, and certifies the feedback path's optimality.
 
 ## Quick start
 
@@ -34,10 +46,10 @@ mathematical MFG theory:
 
 | Directory | Responsibility |
 | --- | --- |
-| `LeanMFG/Model/` | Shared definitions: games, strategies, distributions, and equilibria |
+| `LeanMFG/Model/` | Games, distributions, control problems, and admissible paths |
 | `LeanMFG/Theory/` | Mathematical results such as existence and uniqueness |
 | `LeanMFG/Algorithm/` | Executable solvers and numerical methods |
-| `LeanMFG/Verification/` | Algorithm correctness and convergence proofs |
+| `LeanMFG/Verification/` | Verification theorems and algorithm correctness proofs |
 
 `LeanMFG.lean` imports every current module, including examples, so
 `lake build` checks the whole library. Concrete modules should import the
