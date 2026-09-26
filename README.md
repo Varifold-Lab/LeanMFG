@@ -4,7 +4,37 @@
 
 LeanMFG aims to formalize the mathematics of mean field games and connect executable algorithms with machine-checked proofs. Its scope includes models, equilibrium concepts, and the correctness and convergence of numerical methods.
 
-The project is in early development.
+The project is in early development. The Lean project builds on mathlib and
+currently contains module boundaries but no formalized MFG results yet.
+
+## Quick start
+
+Install [elan](https://github.com/leanprover/elan), then run:
+
+```sh
+lake build
+```
+
+The Lean version and mathlib revision are pinned in `lean-toolchain` and
+`lakefile.toml`.
+
+## Code organization
+
+The layout follows the separation of models, algorithms, and proofs used by
+[LeanSort](https://github.com/Varifold-Lab/LeanSort), with a separate layer for
+mathematical MFG theory:
+
+| Directory | Responsibility |
+| --- | --- |
+| `LeanMFG/Model/` | Shared definitions: games, strategies, distributions, and equilibria |
+| `LeanMFG/Theory/` | Mathematical results such as existence and uniqueness |
+| `LeanMFG/Algorithm/` | Executable solvers and numerical methods |
+| `LeanMFG/Verification/` | Algorithm correctness and convergence proofs |
+
+`LeanMFG.lean` imports every current module. New modules should be imported
+there so `lake build` checks the whole library. The `Basic.lean` files mark
+module boundaries; their comments describe intended scope, not established
+theorems. Concrete modules should import the mathlib files they need directly.
 
 ## References
 
