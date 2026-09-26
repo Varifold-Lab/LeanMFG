@@ -43,6 +43,12 @@ mathematical MFG theory:
 `lake build` checks the whole library. Concrete modules should import the
 mathlib files they need directly.
 
+## Related libraries
+
+- [MFGLib](https://github.com/radar-research-lab/MFGLib) — a Python library
+  for defining and solving mean field games. It includes a rock-paper-scissors
+  environment with a different reward rule from LeanMFG's static example.
+
 ## References
 
 - Pierre Cardaliaguet. [*A Short Course on Mean Field Games*](https://www.ceremade.dauphine.fr/~cardaliaguet/MFGcours2018.pdf). March 31, 2018.
@@ -51,3 +57,4 @@ mathlib files they need directly.
 - Yves Achdou and Italo Capuzzo-Dolcetta. [*Mean Field Games: Numerical Methods*](https://doi.org/10.1137/090758477). SIAM Journal on Numerical Analysis, 48(3), 1136–1162, 2010.
 - Saeed Hadikhanloo and Francisco J. Silva. [*Finite Mean Field Games: Fictitious Play and Convergence to a First Order Continuous Mean Field Game*](https://arxiv.org/abs/1805.05940). Journal de Mathématiques Pures et Appliquées, 132, 369–397, 2019.
 - Mathieu Laurière et al. [*Learning in Mean Field Games: A Survey*](https://arxiv.org/abs/2205.12944). arXiv:2205.12944, 2022.
+- Xin Guo, Anran Hu, Matteo Santamaria, Mahan Tajrobehkar, and Junzi Zhang. [*MFGLib: A Library for Mean-Field Games*](https://arxiv.org/abs/2304.08630). arXiv:2304.08630, 2023.
