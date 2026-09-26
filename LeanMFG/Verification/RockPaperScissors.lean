@@ -28,6 +28,23 @@ theorem exploitability_nonneg (m : Distribution) :
   unfold exploitability
   linarith [expectedReward_le_bestResponse m m]
 
+/-- Zero maximal gain from a unilateral deviation characterizes exact equilibrium. -/
+theorem exploitability_eq_zero_iff (m : Distribution) :
+    exploitability m = 0 ↔ IsEquilibrium m := by
+  constructor
+  · intro h p
+    -- Every mixed strategy is bounded by the best response, whose gain is zero.
+    have hp := expectedReward_le_bestResponse p m
+    dsimp [exploitability] at h
+    linarith
+  · intro hm
+    -- At equilibrium, even the pure best response cannot improve the reward.
+    have hb := hm (pure (bestResponse m))
+    simp only [expectedReward_pure] at hb
+    have hn := exploitability_nonneg m
+    dsimp [exploitability] at *
+    linarith
+
 /-- The executable Boolean result agrees exactly with rational ε-equilibrium. -/
 theorem checkEpsilonEquilibrium_iff (m : Distribution) (ε : ℚ) :
     checkEpsilonEquilibrium m ε = true ↔ IsEpsilonEquilibrium m ε := by

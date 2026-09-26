@@ -15,6 +15,10 @@ def paperScissorsTie : Distribution :=
   ⟨1 / 3, 2 / 3, 0,
     by norm_num, by norm_num, by norm_num, by norm_num⟩
 
+-- The numerical zero-gain condition also identifies the unique population equilibrium.
+example (m : Distribution) (h : exploitability m = 0) : m = uniform := by
+  exact equilibrium_unique m ((exploitability_eq_zero_iff m).mp h)
+
 -- These guards evaluate the actual algorithm during compilation.
 #guard exploitability uniform == (0 : ℚ)
 #guard bestResponse allRock == .Paper
