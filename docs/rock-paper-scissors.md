@@ -71,6 +71,25 @@ strategy beats it, that exploitability is nonnegative, and that the Boolean
 check is equivalent to the quantified $\varepsilon$-equilibrium definition.
 Lean also proves that $(1/3,1/3,1/3)$ is the unique exact equilibrium.
 
+The theorem `exploitability_eq_zero_iff` connects the numerical gain directly
+to exact equilibrium:
+
+```lean
+exploitability m = 0 ↔ IsEquilibrium m
+```
+
+In the forward direction, every mixed strategy earns at most the best-response
+reward. If that best response gains zero over the population strategy, no
+unilateral deviation can improve the reward. In the reverse direction, an
+equilibrium rules out improvement even by the pure best response, so
+exploitability is at most zero. Its nonnegativity then gives equality.
+The population distribution `m` stays fixed in both directions; only the
+representative player's strategy changes.
+
+Combining this equivalence with `equilibrium_unique` shows that any population
+with zero exploitability must be `uniform`. The example module includes this
+use of the theorem.
+
 Run **lake build** to verify these proofs and the executable checks in
 [the example module](../LeanMFG/Examples/RockPaperScissors.lean). They cover
 the uniform population (exploitability $0$), all Rock (best response Paper,
