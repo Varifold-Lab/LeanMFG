@@ -4,19 +4,27 @@
 
 LeanMFG aims to formalize the mathematics of mean field games and connect executable algorithms with machine-checked proofs. Its scope includes models, equilibrium concepts, and the correctness and convergence of numerical methods.
 
-The project is in early development. The Lean project builds on mathlib and
-currently contains module boundaries but no formalized MFG results yet.
+The project is in early development and builds on mathlib. Its first complete
+example is a static rock-paper-scissors mean field game.
 
 ## Quick start
 
 Install [elan](https://github.com/leanprover/elan), then run:
 
 ```sh
+lake exe cache get
 lake build
 ```
 
 The Lean version and mathlib revision are pinned in `lean-toolchain` and
-`lakefile.toml`.
+`lakefile.toml`. The cache command obtains mathlib's precompiled files.
+`lake build` also runs the executable example checks.
+
+## Example
+
+Open the [HTML guide](docs/rock-paper-scissors.html) locally for a worked
+explanation of the model, algorithm, and proofs. A
+[Markdown version](docs/rock-paper-scissors.md) is also available.
 
 ## Code organization
 
@@ -31,10 +39,9 @@ mathematical MFG theory:
 | `LeanMFG/Algorithm/` | Executable solvers and numerical methods |
 | `LeanMFG/Verification/` | Algorithm correctness and convergence proofs |
 
-`LeanMFG.lean` imports every current module. New modules should be imported
-there so `lake build` checks the whole library. The `Basic.lean` files mark
-module boundaries; their comments describe intended scope, not established
-theorems. Concrete modules should import the mathlib files they need directly.
+`LeanMFG.lean` imports every current module, including examples, so
+`lake build` checks the whole library. Concrete modules should import the
+mathlib files they need directly.
 
 ## References
 

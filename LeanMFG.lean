@@ -1,4 +1,5 @@
-import LeanMFG.Model.Basic
-import LeanMFG.Theory.Basic
-import LeanMFG.Algorithm.Basic
-import LeanMFG.Verification.Basic
+import LeanMFG.Model.RockPaperScissors
+import LeanMFG.Algorithm.RockPaperScissors
+import LeanMFG.Theory.RockPaperScissors
+import LeanMFG.Verification.RockPaperScissors
+import LeanMFG.Examples.RockPaperScissors
