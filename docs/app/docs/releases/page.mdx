@@ -21,7 +21,7 @@ Each change updates the implementation, relevant checks, documentation, and <Rep
 | Version checks | Lake/docs versions agree; Lean and dependencies are pinned; candidate metadata matches the tag |
 | Documentation | MDX and TypeScript compile; repository and internal site links resolve |
 
-The **CI gate** depends on all checks. The [scope table and local commands](/docs/verification) distinguish general theorems from finite numerical tests. Solver convergence and general numerical equilibrium certification are outside the current guarantee.
+The **CI gate** depends on the applicable checks. Documentation-only PRs build the library and site and run the documented Lean example. Changes to library code, dependencies, scripts, or tests run the full suite above, as do pushes to `main` and release runs. The [scope table and local commands](/docs/verification) distinguish general theorems from finite numerical tests. Solver convergence and general numerical equilibrium certification are outside the current guarantee.
 
 ## One-time repository settings
 

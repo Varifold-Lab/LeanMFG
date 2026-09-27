@@ -37,19 +37,46 @@ jobs:
           if [[ -n "$RELEASE_TAG" ]]; then args+=(--tag "$RELEASE_TAG"); fi
           if [[ "$GITHUB_REF_TYPE" == tag ]]; then args+=(--require-tag); fi
           python3 scripts/check_release.py "${args[@]}" --output .artifacts/source.json --notes .artifacts/release-notes.md
+      - name: Select checks for changed files
+        id: scope
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          python3 - <<'PY'
+          import os, subprocess
+          base = os.environ.get('BASE_SHA', '')
+          files = subprocess.check_output(
+              ['git', 'diff', '--name-only', base, 'HEAD'], text=True
+          ).splitlines() if base else []
+          documentation_workflows = {
+              '.github/workflows/pages.yml', '.github/workflows/ci.yml',
+              '.github/workflows/release.yml',
+          }
+          def documentation_file(path):
+              return (path.startswith('docs/') or path.endswith('.md') or
+                      path == '.gitignore' or path in documentation_workflows)
+          full = not base or any(not documentation_file(path) for path in files)
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write(f'library={str(full).lower()}\n')
+          print('Full library verification' if full else
+                'Documentation change: library build and runnable documentation example')
+          PY
       - uses: leanprover/lean-action@50fcf42d2e460296f1a34b402e990d1b24f8b596 # v1
         with:
           auto-config: false
           build: true
-          build-args: LeanMFG mfglib_check mfglib
+          build-args: ${{ steps.scope.outputs.library == 'true' && 'LeanMFG mfglib_check mfglib' || 'LeanMFG' }}
           use-mathlib-cache: true
       - name: Axiom policy
+        if: steps.scope.outputs.library == 'true'
         run: lake env lean scripts/Audit.lean | tee .artifacts/axioms.log
       - name: MFGLib numerical reference checks
+        if: steps.scope.outputs.library == 'true'
         run: .lake/build/bin/mfglib_check | tee .artifacts/numerical.log
       - name: Documentation Lean example
         run: lake env lean --run docs/examples/Solve.lean | tee .artifacts/documentation-example.log
       - name: Install exact commit in a fresh client
+        if: steps.scope.outputs.library == 'true'
         run: python3 scripts/check_downstream.py --revision "$GITHUB_SHA" | tee .artifacts/downstream.log
       - name: Source and lockfiles stayed fixed
         run: |
