@@ -4,6 +4,26 @@ import { SourceLink } from '@/components/SourceLink'
 
 Verification modules connect executable definitions and mathematical specifications.
 
+The [development and release guide](/docs/releases) explains how these checks gate a release.
+
+## Verification scope
+
+This table describes the source at this commit. Implementation, finite numerical
+testing, and general formal proofs are separate claims. Release artifacts include
+the source commit and input hashes; successful CI logs record which gates ran.
+
+| Component | Implemented | Checked by examples/reference tests | Formally proved | Boundary |
+| --- | --- | --- | --- | --- |
+| Static rational rock-paper-scissors | Best response, exploitability, equilibrium checker | Build-time guards | Best-response optimality, checker equivalence, uniform equilibrium and uniqueness | Three actions and rational mixed strategies |
+| Rational one-step finite-state game | Forward update and equilibrium checker | Left/Right guards | Nonnegativity/mass conservation, including repeated updates; optimal response and checker equivalence | Existing rational model, not the general numerical port |
+| Continuous deterministic control | Problem, paths, HJB candidate definitions | Worked quadratic example | Classical verification and optimal feedback for the example | Explicit smoothness/integrability assumptions; no coupled dynamic MFG result |
+| General computational MFG model | Finite horizon, shaped states/actions, population-dependent rewards/transitions | All ten upstream environments; forward/Bellman/scoring fixtures | No general model-to-solver refinement proof | Runtime validation permits numerical tolerances |
+| FP, OMD, Prior Descent, MFOMO, OMI | Native solvers, histories, stopping | Pinned reference vectors and edge cases; coverage detailed in the port guide | No whole-solver correctness, convergence, or equilibrium certificate | Projection, optimizer, and backend differences are documented |
+| Tuning, JSON, CLI, directional AD | Implemented | Reference gradients, configuration round trips, tuning and CLI integration | No general AD or optimizer correctness proof | CPU Float/Dual backend; no arbitrary Torch/Optuna backend |
+| Binary64 sums/dot products | Explicit nearest-even arithmetic and finite checks | 20 build-time guards; solver callers in reference suite | Local and accumulated error; checked-result soundness; array conversion bridge | Bounds relative to stored inputs; finite execution required |
+| One numerical population step | Checked array kernel used by the solver | 17 build-time guards and reference suite | Coordinate/L1 error, mass drift, input-error propagation, checked-interface soundness | Joint population to next state law only; callback error bounds are assumptions |
+| External package use | Git dependency in a new Lake project | Root import, public theorem, complete OMD/scoring/population example | Reuses the imported theorem; numerical client behavior is tested | LeanMFG itself is rebuilt; exact-revision transitive dependency caches are reused |
+
 ## Equilibrium certificates
 
 For rock-paper-scissors, <SourceLink path="LeanMFG/Verification/Static/RockPaperScissors.lean">the proofs</SourceLink> show that the actual `bestResponse` program returns a maximizing action, every rational mixed strategy scores no higher, exploitability is nonnegative, zero exploitability characterizes exact equilibrium, and the Boolean checker accepts exactly the defined ε-equilibria.
@@ -14,8 +34,70 @@ For the one-step finite-state game, <SourceLink path="LeanMFG/Verification/Finit
 
 <SourceLink path="LeanMFG/Verification/FiniteState/Conservation.lean">Conservation theorems</SourceLink> prove directly from the weighted transition sums that every destination mass is nonnegative and total mass remains one. They also prove these properties after any number of updates under any admissible policy sequence. No equilibrium assumption is needed; normalized transitions and a closed population are needed.
 
+For the floating-point port, the [one-step population update](/docs/numerical/population)
+has coordinate and L1 error bounds, plus a mass-drift bound that includes
+rounding, transition-column defects, and incoming normalization error. It applies
+to the array update actually called by the solver; it does not assert exact
+floating-point conservation.
+
 ## HJB verification
 
 <SourceLink path="LeanMFG/Verification/Continuous/HJB.lean">The classical verification theorem</SourceLink> gives every admissible path a lower cost bound from the HJB candidate. A path following the minimizing feedback `a = -∂ₓu` attains the bound and is optimal. Interval integrability of the derivative along a path is an explicit hypothesis of the general theorem. The [quadratic example](/docs/examples/hjb) proves that hypothesis for its paths.
 
-Run `lake build` at the repository root to check all these proofs and the executable `#guard` examples.
+## Floating-point reductions
+
+The [numerical foundation](/docs/numerical) connects FloatLib binary64 addition
+and multiplication to the port's shared sum and dot-product implementations.
+<SourceLink path="LeanMFG/Verification/Numerical/Binary64.lean">Its proofs</SourceLink>
+bound local and accumulated rounding error and show that successful finiteness
+checks imply those bounds. Whole-solver correctness remains separate work.
+
+<h2 id="required-checks">Required checks</h2>
+
+```sh
+lake exe cache get
+lake build LeanMFG mfglib_check mfglib
+lake env lean scripts/Audit.lean
+lake exe mfglib_check
+python3 scripts/check_downstream.py
+python3 -m unittest discover -s tests/release -v
+python3 scripts/check_release.py
+cd docs
+npm ci
+npm run build
+```
+
+`lake build` elaborates the proofs and evaluates the executable guards.
+`scripts/Audit.lean` audits declarations in the LeanMFG modules imported by the
+root library, including private declarations and transitive axiom dependencies.
+It permits only `propext`, `Classical.choice`, and `Quot.sound`; `sorryAx`,
+custom axioms, and `Lean.ofReduceBool` are rejected. This policy does not verify
+the compiler, machine code, hardware, or native floating-point operations.
+
+`mfglib_check` uses 358 committed reference vectors (43,352 scalar comparisons)
+from MFGLib commit `d4adccf134e88ad47e0a517af5175edaec15a30f`, plus integration
+checks. It uses explicit tolerances and does not establish correctness for all
+inputs. Normal checks do not need Python ML packages or regenerate fixtures.
+
+The external-client check uses a temporary Git snapshot for uncommitted local
+work. CI passes `--revision "$GITHUB_SHA"` to install the exact checked commit.
+It creates a new Lake project, verifies every resolved dependency revision,
+and rebuilds LeanMFG; it does not modify or commit the source repository.
+
+The release metadata check validates versions, dependency locks, and changelog
+structure. Its JSON records provenance; it does not itself assert that a build
+or test passed. CI only publishes after all checks succeed.
+
+The documentation build checks MDX, TypeScript, local Lean source links, and
+exported internal links. Release builds require a clean checkout and record
+their version and commit in `build-info.json`. Source links use that commit.
+
+## Not yet covered
+
+The port has no full finite-horizon refinement, multi-step numerical error
+propagation, Bellman error certificate, numerical ε-equilibrium certificate,
+general convergence theorem, or discretization bridge to continuous MFGs.
+Forming joint populations, callback arithmetic, native Dual operations, and
+transcendentals remain outside the current numerical proof chain.
+
+Keep this page current when adding, moving, or weakening a guarantee.

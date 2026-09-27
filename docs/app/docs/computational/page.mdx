@@ -1,0 +1,216 @@
+import { SourceLink, RepositoryLink } from '@/components/SourceLink'
+
+# MFGLib in Lean
+
+`LeanMFG.Computational` implements the finite-horizon numerical workflow of
+[MFGLib 0.3.0](https://github.com/radar-research-lab/MFGLib/tree/d4adccf134e88ad47e0a517af5175edaec15a30f).
+The baseline is pinned to commit `d4adccf134e88ad47e0a517af5175edaec15a30f`.
+These modules execute natively in Lean. The solver reference checks are numerical
+tests. The shared [sum and dot-product primitives](/docs/numerical) have formal
+rounding-error bounds; correctness and convergence of whole solvers remain open.
+
+## General model
+
+An <SourceLink path="LeanMFG/Computational/Environment.lean">Environment</SourceLink>
+contains a horizon $T$, arbitrary finite state and action shapes $S$ and $A$,
+an initial distribution $\mu_0$, a reward scale `rMax`, and two callbacks:
+
+$$
+r_t(s,a,L_t),\qquad P_t(s'\mid s,a,L_t).
+$$
+
+Both callbacks can depend on time and the full joint state–action population
+$L_t$. A policy $\pi_t(a\mid s)$ induces the forward evolution
+
+$$
+L_0(s,a)=\mu_0(s)\pi_0(a\mid s),\qquad
+L_{t+1}(s',a')=\pi_{t+1}(a'\mid s')\sum_{s,a}L_t(s,a)P_t(s'\mid s,a,L_t).
+$$
+
+Rewards are collected at times $0,\ldots,T$, including the terminal time.
+Transitions run at $0,\ldots,T-1$. The Bellman recursion is undiscounted,
+matching the pinned implementation. When computing a best response or
+evaluating a deviating policy, the population sequence $L$ stays fixed.
+
+The representation uses CPU `Float` (binary64) arrays in row-major order.
+The shared `sum` and `dot` functions use FloatLib's explicit nearest-even binary64
+operations, converting at the array boundary. The forward state-population
+step calls the [checked population kernel](/docs/numerical/population), with
+proved coordinate, L1, and mass-drift bounds. Other arithmetic, including Dual
+operations, transcendental functions, and handwritten accumulation loops, still
+uses native `Float` and is outside those primitive error theorems.
+Policy and mean-field shapes are `(T+1, *S, *A)`; a reward slice has shape
+`(*S, *A)` and a transition slice has shape `(*S_destination, *S_source, *A)`.
+`S` and `A` retain their multidimensional shapes; numerical loops use their
+products. Public policy constructors and solvers validate dimensions,
+finiteness, nonnegativity, and probability sums. This runtime validation is
+separate from the proof-carrying rational distributions used by earlier cases.
+
+Environment callbacks operate on <SourceLink path="LeanMFG/Computational/Numeric.lean">Dual</SourceLink>
+values, which carry a value and one directional derivative. Ordinary forward
+evaluation uses zero derivative seeds. MFOMO seeds each variable in turn,
+so derivatives include the dependence of rewards and transitions on $L$.
+Custom callbacks should use Dual arithmetic for differentiable operations.
+The rounded transitions in Linear Quadratic have zero derivative through the
+rounding decision, following the upstream implementation.
+
+## Capability map
+
+| MFGLib feature | Lean entry point | Status |
+| --- | --- | --- |
+| Environments and time-dependent callbacks | `Environment`, `Environments` | All ten built-in models implemented |
+| Policy build, uniform, stationary, greedy | `Policy`, `greedyPolicyGivenMeanField` | Includes equal probability over tied maximizers |
+| Forward population and policy recovery | `meanFieldFromPolicy`, `policyFromMeanField` | Zero-mass state rows recover a uniform policy |
+| Optimal and fixed-policy Q functions | `QFn.optimal`, `QFn.forPolicy` | Backward finite-horizon recursion |
+| Exploitability and policy cleanup | `exploitabilityScore`, `exploitabilityScores`, `Policy.postprocess` | Best-response value minus policy value under its induced population |
+| Fictitious Play | `FictitiousPlay.solve` | Occupancy-weighted update; constant or diminishing steps |
+| Online Mirror Descent | `OnlineMirrorDescent.solve` | Cumulative policy Q values and softmax |
+| Prior Descent | `PriorDescent.solve` | Fixed or periodically refreshed prior |
+| MF-OMO | `MFOMO.solve` | Three losses, both parameterizations, hat initialization, residual balancing, Adam and SGD |
+| Occupation Measure Inclusion | `OccupationMeasureInclusion.solve` | Same update and projection problem; native Dykstra backend |
+| Simplex projection and occupation matrices | `projectSimplex`, `mfOMOParams` | Native numerical implementations |
+| Solve history and stopping | `SolveResult`, `SolveOptions` | Policies, exploitabilities, elapsed times; absolute/relative stopping |
+| Tuning metrics | `Metric.failureRate`, `Metric.geometricMean` | Iteration, runtime, or best exploitability statistic |
+| Tuning and saved configuration | `tune`, `randomCandidates`, `Algorithm.save/load` | Native candidate/random search and JSON; no Optuna dependency |
+
+The solver implementations are in
+<SourceLink path="LeanMFG/Computational/Algorithms/Iterative.lean">Iterative</SourceLink>,
+<SourceLink path="LeanMFG/Computational/Algorithms/MFOMO.lean">MFOMO</SourceLink>, and
+<SourceLink path="LeanMFG/Computational/Algorithms/OccupationMeasure.lean">OccupationMeasure</SourceLink>.
+The <SourceLink path="LeanMFG/Computational/Tuning.lean">tuning interface</SourceLink>
+accepts multiple environments and initial policies, records failed trials, and
+returns the best successful configuration. Random search uses the upstream
+parameter ranges and supports frozen fields.
+
+## Built-in environments
+
+All definitions and parameter defaults are in
+<SourceLink path="LeanMFG/Computational/Environments.lean">Environments.lean</SourceLink>.
+
+| Command-line name | Lean constructor | State/action setting |
+| --- | --- | --- |
+| `beach_bar` | `beachBar` | One-dimensional movement with congestion |
+| `building_evacuation` | `buildingEvacuation` | Floors and two spatial coordinates; six actions |
+| `conservative_treasure_hunting` | `conservativeTreasureHunting` | Population-dependent transitions |
+| `crowd_motion` | `crowdMotion` | Two-dimensional movement and a moving attraction |
+| `equilibrium_price` | `equilibriumPrice` | Inventory with a two-dimensional action space |
+| `left_right` | `leftRight` | Three states and two actions |
+| `linear_quadratic` | `linearQuadratic` | Discretized state/control and rounded noisy transitions |
+| `random_linear` | `randomLinear` | Affine population rewards and softmax transitions |
+| `rock_paper_scissors` | `rockPaperScissors` | Upstream weighted, non-zero-sum game with four states |
+| `susceptible_infected` | `susceptibleInfected` | Infection dynamics and distancing decisions |
+
+The upstream rock–paper–scissors rewards are weighted. They are distinct from
+the [everyday static game](/docs/examples/rock-paper-scissors) already proved
+in this repository. Beach Bar and Crowd Motion use clamped boundary movement,
+as the source code does, despite upstream descriptions referring to a torus.
+
+## Run
+
+From the repository root:
+
+```sh
+lake build
+lake exe mfglib_check
+lake exe mfglib left_right omd 20
+lake exe mfglib susceptible_infected fp 10
+lake exe mfglib left_right mfomo 10
+lake exe mfglib left_right omi 10
+```
+
+The solver command emits JSON containing the policy shape, full iteration
+history, and best index. Algorithms are `fp`, `omd`, `pd`, `mfomo`, and `omi`.
+`lake exe mfglib --list` lists all environments.
+
+For full configuration, generate a JSON example, edit it, and run it:
+
+```sh
+lake exe mfglib --write-config /tmp/leanmfg-run.json
+lake exe mfglib --config /tmp/leanmfg-run.json
+```
+
+The schema is <SourceLink path="LeanMFG/Computational/CLI.lean">RunConfig</SourceLink>.
+It includes the environment's constructor arguments, algorithm parameters,
+optional initial policy, and stopping options. `--tune FILE` accepts a
+`TuneConfig` with environments, algorithm candidates, a metric, and solve options.
+Finite numerical values are written as exact decimal JSON numbers, preserving
+small tolerances and saved policy probabilities through parsing. Diagnostic
+terminal messages still use Lean's ordinary short Float display.
+
+In Lean, import `LeanMFG.Computational` and call a solver directly:
+
+```lean
+open LeanMFG.Computational
+
+def demo : IO Unit := do
+  let result ← (OnlineMirrorDescent.solve { alpha := 0.2 }
+    Environments.leftRight none { maxIter := 20 }).run
+  match result with
+  | .ok trace => IO.println trace.exploitabilities
+  | .error message => IO.eprintln message
+```
+
+## What the checks establish
+
+<SourceLink path="LeanMFG/Computational/Checks.lean">The native check suite</SourceLink>
+compares committed reference arrays generated by the pinned, unmodified Python
+source. It covers every environment, forward evolution, rewards, transitions,
+both Q recursions, greedy policies, exploitability, solver traces, occupation
+matrices, simplex/occupation projections, and MFOMO objectives and automatic
+derivatives for all three losses and both parameterizations. It also exercises
+invalid inputs, tied actions, zero-mass states, early stopping, tuning, and JSON
+serialization. Reference agreement uses explicit absolute and relative
+tolerances; it does not assert bitwise equality or correctness for every input.
+
+Normal builds and checks need no Python. To regenerate the reference file,
+use Python 3.12, install `tests/mfglib/requirements-oracle.txt`, check out the
+pinned upstream commit in a separate directory, and run:
+
+```sh
+python scripts/mfglib_reference.py --upstream /path/to/MFGLib
+lake exe mfglib_check
+```
+
+The generator rejects a different commit or a modified checkout and records
+the PyTorch version. Arithmetic tests use float64, except upstream OMI traces:
+its OSQP wrapper forces float32, so those runs use float32 throughout. Random coefficients and RNG
+fixtures use PyTorch's scalar CPU float32 sampling convention, reproduced by
+<SourceLink path="LeanMFG/Computational/Random.lean">MT19937</SourceLink>.
+
+## Differences and remaining work
+
+- **Numerical backend:** arrays and loops run on the CPU with binary64 values.
+  PyTorch tensor APIs, GPU execution, and bitwise equality to float32 runs are
+  not provided. Dense matrices and forward automatic differentiation prioritize
+  a direct executable implementation; large instances need performance work.
+- **OMI projection:** native Dykstra iteration solves the same constrained
+  Euclidean projection as the upstream OSQP call. It reports failure if its
+  feasibility and complementarity tolerances are not reached. Warm starts and
+  iteration counts differ from OSQP. Projection tolerances are explicit in the
+  Lean configuration rather than inherited from outer stopping tolerances.
+- **Optimization and tuning:** Adam and SGD are implemented, including SGD
+  momentum. Arbitrary PyTorch optimizers and Optuna's TPE sampler, study database,
+  pruning, and Python serialization formats remain outside this port. Native
+  candidate search, seeded random search, frozen parameters, metrics, and JSON
+  provide the corresponding basic workflow.
+- **Stable arithmetic:** softmax and prior updates subtract a maximum before
+  exponentiation; geometric means use logarithms. Parameterized hat
+  initialization is compared through the probabilities it represents because
+  logarithms amplify reduction roundoff near zero. The pinned upstream's
+  augmented slack convention is retained.
+- **Explicit fixes:** upstream Fictitious Play raises a shape error on
+  multidimensional actions. The Lean implementation handles flattened action
+  rows, and tests that case separately. For a custom MFOMO `u`, hat initialization
+  uses the population represented by `softmax(u)`; upstream instead passes raw
+  `u` into its probability check. Inputs containing NaN or infinity are rejected.
+- **Proof scope:** the shared sum and dot product have [formal local and cumulative
+  error bounds](/docs/numerical), conditional on finite inputs and intermediates.
+  The [one-step population update](/docs/numerical/population) composes them into
+  forward-error and mass-drift bounds, including explicit input perturbations.
+  The port has no whole-solver correctness, convergence, equilibrium-existence,
+  or discretization-error theorems.
+  `rMax` follows the upstream numerical scale and is not a certified bound.
+  Existing rational and continuous proofs remain available in their original
+  modules. A formal bridge to these numerical implementations is separate work.
+
+Upstream attribution and license texts are preserved in the repository's <RepositoryLink path="NOTICE">third-party notices</RepositoryLink>.

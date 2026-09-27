@@ -5,7 +5,20 @@ defaultTargets = ["LeanMFG"]
 [[require]]
 name = "mathlib"
 scope = "leanprover-community"
-rev = "e06eff5f95374108acfaf19f1ff7473aa7771df2"
+rev = "5ed2965256430c3649e86755f9576b54eca72435"
+
+[[require]]
+name = "floatlib"
+git = "https://github.com/lean-dojo/FloatLib.git"
+rev = "5f8218dc571c01d6f8bd070c65bcd0de3a40b3c5"
 
 [[lean_lib]]
 name = "LeanMFG"
+
+[[lean_exe]]
+name = "mfglib_check"
+root = "LeanMFG.Computational.CheckMain"
+
+[[lean_exe]]
+name = "mfglib"
+root = "LeanMFG.Computational.CLI"

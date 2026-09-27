@@ -1,6 +1,8 @@
+import { RepositoryLink } from '@/components/SourceLink'
+
 # Getting started
 
-LeanMFG is a Lean 4 library built against a pinned mathlib revision. The documentation is a separate Next.js application whose content is written in MDX.
+LeanMFG uses Lean 4.34.0 with pinned mathlib and FloatLib revisions. The documentation is a separate Next.js application whose content is written in MDX.
 
 ## Check the Lean library
 
@@ -11,11 +13,20 @@ lake exe cache get
 lake build
 ```
 
-The cache command downloads precompiled mathlib artifacts. `lake build` checks the theorem proofs and evaluates the executable `#guard` examples. A failed guard fails the build.
+The cache command downloads precompiled mathlib artifacts. The first build also compiles the required FloatLib modules. `lake build` checks the theorem proofs and evaluates the executable `#guard` examples. A failed guard fails the build.
+
+## Run the MFGLib port
+
+```sh
+lake exe mfglib_check
+lake exe mfglib left_right omd 20
+```
+
+The first command compares numerical outputs with committed upstream reference data. The second runs Online Mirror Descent and emits a JSON solution history. The [port guide](/docs/computational) covers all ten environments, five solver families, configuration, tuning, and numerical backend differences. Neither command requires Python.
 
 ## Run this documentation locally
 
-Node.js 20.9 or newer is required. From the repository root:
+Use Node.js 24.14.0, pinned in `.node-version` and used by CI. From the repository root:
 
 ```sh
 cd docs
@@ -27,4 +38,36 @@ Open [http://localhost:3000](http://localhost:3000). `npm run build` checks the 
 
 The documentation navigation follows the library's [Model](/docs/model), [Theory](/docs/theory), [Algorithm](/docs/algorithm), [Verification](/docs/verification), and worked example layers. A source link in an MDX page is checked against the local Lean file during the documentation build, so a moved module cannot silently leave a stale source link.
 
-The site is configured for static export. For hosting under a repository subpath such as `/LeanMFG`, set `NEXT_PUBLIC_BASE_PATH=/LeanMFG` when building. Publishing and hosting are separate from the local build.
+The site is configured for static export. For hosting under a repository subpath such as `/LeanMFG`, set `NEXT_PUBLIC_BASE_PATH=/LeanMFG` when building. [Release builds](/docs/releases) record their version and source commit and deploy that same artifact.
+
+## Use LeanMFG as a dependency
+
+Choose a published version's source commit, or a reviewed development commit before the first release. Copy that commit's `lean-toolchain` into a new Lake project and add the following to `lakefile.toml`. Replace `COMMIT_SHA` with the full 40-character commit; it is a placeholder, not a branch name.
+
+```toml
+[[require]]
+name = "leanmfg"
+git = "https://github.com/Varifold-Lab/LeanMFG.git"
+rev = "COMMIT_SHA"
+```
+
+Then resolve dependencies and build:
+
+```sh
+lake update
+lake exe cache get
+lake build
+```
+
+Use `import LeanMFG` in your Lean files. For example:
+
+```lean
+import LeanMFG
+
+example : LeanMFG.RPS.IsEquilibrium LeanMFG.RPS.uniform :=
+  LeanMFG.RPS.uniform_equilibrium
+```
+
+The <RepositoryLink path="tests/downstream/Main.lean">complete downstream example</RepositoryLink> also runs Online Mirror Descent, checks the solver history and improvement, and computes the resulting population. CI builds and runs this client from a fresh Git installation. It reuses only the pinned transitive dependency caches, rebuilding LeanMFG itself.
+
+Use the selected commit's dependency versions together. An unrelated mathlib or FloatLib revision in a parent project is not a supported compatibility combination. Commit the downstream project's generated `lake-manifest.json`.

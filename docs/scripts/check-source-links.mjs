@@ -12,12 +12,13 @@ function inspect(directory) {
       inspect(file)
     } else if (entry.name.endsWith('.mdx')) {
       const content = readFileSync(file, 'utf8')
-      for (const [, source] of content.matchAll(/<SourceLink\s+path="([^"]+)"/g)) {
-        if (!source.startsWith('LeanMFG/') || !source.endsWith('.lean')) {
+      for (const [, component, source] of content.matchAll(/<(SourceLink|RepositoryLink)\s+path="([^"]+)"/g)) {
+        if (source.startsWith('/') || source.split('/').includes('..') ||
+            (component === 'SourceLink' && (!source.startsWith('LeanMFG/') || !source.endsWith('.lean')))) {
           throw new Error(`Invalid source link in ${file}: ${source}`)
         }
         if (!existsSync(join(repository, source))) {
-          throw new Error(`Missing Lean module linked from ${file}: ${source}`)
+          throw new Error(`Missing repository file linked from ${file}: ${source}`)
         }
         count += 1
       }
@@ -26,4 +27,4 @@ function inspect(directory) {
 }
 
 inspect(app)
-console.log(`Checked ${count} Lean source links in MDX pages.`)
+console.log(`Checked ${count} repository source links in MDX pages.`)

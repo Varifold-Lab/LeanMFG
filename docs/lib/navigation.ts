@@ -5,6 +5,7 @@ export const documentation = [
       { title: 'Overview', href: '/' },
       { title: 'Getting started', href: '/docs/getting-started' },
       { title: 'Architecture', href: '/docs/architecture' },
+      { title: 'MFGLib in Lean', href: '/docs/computational' },
     ],
   },
   {
@@ -13,6 +14,7 @@ export const documentation = [
       { title: 'Model', href: '/docs/model' },
       { title: 'Theory', href: '/docs/theory' },
       { title: 'Algorithm', href: '/docs/algorithm' },
+      { title: 'Numerical foundation', href: '/docs/numerical' },
       { title: 'Verification', href: '/docs/verification' },
     ],
   },
@@ -22,10 +24,14 @@ export const documentation = [
       { title: 'Rock · Paper · Scissors', href: '/docs/examples/rock-paper-scissors' },
       { title: 'Finite-state Left/Right', href: '/docs/examples/finite-state-left-right' },
       { title: 'Classical HJB', href: '/docs/examples/hjb' },
+      { title: 'Numerical population update', href: '/docs/numerical/population' },
     ],
   },
   {
     title: 'Project',
-    items: [{ title: 'References', href: '/docs/references' }],
+    items: [
+      { title: 'Development and releases', href: '/docs/releases' },
+      { title: 'References', href: '/docs/references' },
+    ],
   },
 ] as const

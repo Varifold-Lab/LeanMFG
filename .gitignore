@@ -2,3 +2,7 @@
 .DS_Store
 *.olean
 *.ilean
+.artifacts/
+__pycache__/
+docs/lib/build-info.json
+docs/public/build-info.json

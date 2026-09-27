@@ -4,6 +4,10 @@ import { SourceLink } from '@/components/SourceLink'
 
 Model modules define the objects that appear in mathematical statements and executable programs. They record admissibility conditions so later theorems can use them directly.
 
+## General computational environment
+
+The [MFGLib port](/docs/computational) uses a general finite-horizon `Environment` with multidimensional state/action shapes, initial law, population-dependent reward and transition callbacks, and time-indexed policies. It uses native floating-point arrays and runtime validation. The smaller rational and continuous models below retain their proof-carrying interfaces; they do not restrict this computational model.
+
 ## Static distributions
 
 The rock-paper-scissors <SourceLink path="LeanMFG/Model/Static/RockPaperScissors.lean">model</SourceLink> has three actions and rational mixed strategies. The `Distribution` structure carries proofs that every probability is nonnegative and the three probabilities sum to one. The representative player's strategy `p` and population distribution `m` have the same type but separate roles: a unilateral deviation changes `p` while `m` stays fixed.
