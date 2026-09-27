@@ -24,10 +24,6 @@ theorem bestAction_optimal (G : Game State Action) (m : Distribution State)
     have hmax := List.le_of_mem_argmax ha hb
     simpa [bestAction, candidates, f, harg] using hmax
 
-private theorem expect_pure {α : Type*} [Fintype α] [DecidableEq α]
-    (a : α) (f : α → ℚ) : (Distribution.pure a).expect f = f a := by
-  simp [Distribution.expect, Distribution.pure]
-
 /-- No mixed action beats the maximizing pure action. -/
 theorem expect_le_bestAction (G : Game State Action) (m : Distribution State)
     (s : State) (p : Distribution Action) :
@@ -55,7 +51,7 @@ theorem value_le_bestResponse (G : Game State Action) (m : Distribution State)
         actionValue G m s (bestAction G m s) :=
       expect_le_bestAction G m s (π s)
     _ = (bestResponse G m s).expect (actionValue G m s) := by
-      simp [bestResponse, expect_pure]
+      simp [bestResponse]
 
 /-- Exploitability is always nonnegative. -/
 theorem exploitability_nonneg (G : Game State Action)

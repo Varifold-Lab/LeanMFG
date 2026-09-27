@@ -30,6 +30,7 @@ the source commit and input hashes; successful CI logs record which gates ran.
 For rock-paper-scissors, <SourceLink path="LeanMFG/Verification/Static/RockPaperScissors.lean">the proofs</SourceLink> show that the actual `bestResponse` program returns a maximizing action, every rational mixed strategy scores no higher, exploitability is nonnegative, zero exploitability characterizes exact equilibrium, and the Boolean checker accepts exactly the defined ε-equilibria.
 
 For the one-step finite-state game, <SourceLink path="LeanMFG/Verification/FiniteState/OneStep.lean">the analogous proofs</SourceLink> establish maximizing actions, an optimal best-response policy, nonnegative exploitability, and checker equivalence.
+The model also exposes `Distribution.expect_pure`: the expectation of a rational function under a deterministic distribution equals its value at the chosen state or action.
 
 ## Population conservation
 

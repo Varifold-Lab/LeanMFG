@@ -32,6 +32,11 @@ def pure [DecidableEq α] (a : α) : Distribution α where
 def expect (p : Distribution α) (f : α → ℚ) : ℚ :=
   ∑ a, p.prob a * f a
 
+/-- A deterministic distribution evaluates a function at its chosen point. -/
+@[simp] theorem expect_pure [DecidableEq α] (a : α) (f : α → ℚ) :
+    (pure a).expect f = f a := by
+  simp [expect, pure]
+
 theorem expect_const (p : Distribution α) (c : ℚ) :
     p.expect (fun _ => c) = c := by
   unfold expect
