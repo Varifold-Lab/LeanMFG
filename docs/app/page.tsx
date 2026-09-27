@@ -34,11 +34,11 @@ export default function Home() {
           <p className="eyebrow">Formal methods for mean field games</p>
           <h1>From model to machine-checked guarantee.</h1>
           <p className="home-lede">
-            LeanMFG connects mathematical definitions, executable algorithms, and
-            concrete examples in Lean 4. Each result states the assumptions that make it true.
+            LeanMFG builds a formal counterpart to MFGLib's MFG workflow and adds
+            machine-checked theory and correctness proofs. Each result states the assumptions that make it true.
           </p>
           <div className="hero-actions">
-            <Link className="button button-primary" href="/docs/architecture">Explore the library <span aria-hidden="true">→</span></Link>
+            <Link className="button button-primary" href="/docs/computational">Run MFGLib in Lean <span aria-hidden="true">→</span></Link>
             <a className="button button-secondary" href="https://github.com/Varifold-Lab/LeanMFG">View source ↗</a>
           </div>
           <div className="proof-chain" aria-label="LeanMFG proof chain">
@@ -47,6 +47,7 @@ export default function Home() {
         </div>
       </section>
       <section className="home-section">
+        <p>The numerical library provides all ten MFGLib environments and five solver families. <Link href="/docs/computational">Read the port guide</Link> for tested coverage, backend differences, and the current proof boundary.</p>
         <div className="section-heading">
           <p className="eyebrow">Verified now</p>
           <h2>Start with a complete case</h2>

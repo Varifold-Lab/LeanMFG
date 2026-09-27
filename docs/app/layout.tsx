@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import buildInfo from '@/lib/build-info.json'
 import 'katex/dist/katex.min.css'
 import './globals.css'
 
@@ -31,8 +32,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         </header>
         {children}
         <footer className="site-footer">
-          <span>LeanMFG · Machine-checked mean field games</span>
-          <a href="https://github.com/Varifold-Lab/LeanMFG/blob/main/LICENSE">Apache-2.0</a>
+          <span>LeanMFG · {buildInfo.tag || `${buildInfo.version}-dev`} · {buildInfo.commit.slice(0, 8)}{buildInfo.dirty ? ' · local changes' : ''}</span>
+          <a href={`https://github.com/Varifold-Lab/LeanMFG/blob/${buildInfo.commit}/LICENSE`}>Apache-2.0</a>
         </footer>
       </body>
     </html>

@@ -1,0 +1,156 @@
+import { SourceLink } from '@/components/SourceLink'
+
+# One population update
+
+The numerical port now has a proved error bound for the forward step from a
+joint state–action population to the next state population:
+
+$$
+\mu_{t+1}(s')=\sum_{s,a}L_t(s,a)P_t(s'\mid s,a,L_t).
+$$
+
+The proof applies to the
+<SourceLink path="LeanMFG/Numerical/Population.lean">executable update</SourceLink>
+called by <SourceLink path="LeanMFG/Computational/Policy.lean">`meanFieldFromPolicy`</SourceLink>.
+It builds on the [binary64 sum and dot-product bounds](/docs/numerical).
+
+## Data and execution
+
+Write $N$ for the number of destination states and $K=S\times A$ for the number
+of flattened source state–action pairs. An `Input N K` stores a population
+$\widehat L_i$ and transition entries $\widehat P_{ji}$. Each stored value uses
+FloatLib binary64. The hats below refer to their exact real interpretations.
+
+The array interface accepts a population of length $K$ and a transition array
+of length $N K$. Entry $(j,i)$ is stored at `j * K + i`: **destination first,
+then source state and action**, matching the environment callback convention.
+The adapter has proofs that correctly shaped arrays are read at valid indices.
+
+`update` rounds each product separately and sums the products from left to
+right, starting at positive zero. `forward` exports the resulting values to
+an `Array Float`. The theorem `forward_denote` connects each exported value to
+the typed kernel's real interpretation.
+
+`checkedForward` additionally checks positive dimensions, exact array lengths,
+finite inputs, and finite products and intermediate sums. A failed check returns
+`none`; the solver reports an error. It does not silently truncate mismatched
+arrays. Subnormal results and rounding to zero are allowed.
+
+**This is an arithmetic check.** It does not establish nonnegativity or
+stochasticity. The solver's existing distribution validation remains in place;
+its numerical tolerances do not constitute proofs of exact normalization.
+
+## Rounding error
+
+Define the exact arithmetic result on the stored inputs by
+
+$$
+\bar\mu_j=\sum_i\widehat L_i\widehat P_{ji}.
+$$
+
+Let $\widetilde\mu_j$ be the real interpretation of the computed output and
+$B_j$ be the dot-product error budget for that row: the sum of multiplication
+half-ULPs plus the half-ULPs at the actual partial sums. For a finite execution,
+the proofs establish
+
+$$
+|\widetilde\mu_j-\bar\mu_j|\le B_j,
+\qquad
+\sum_j|\widetilde\mu_j-\bar\mu_j|\le\sum_j B_j.
+$$
+
+The second inequality is a bound on the whole vector's L1 error.
+
+## How much can total mass change?
+
+Stored transition columns need not sum to exactly one. Define their defects by
+
+$$
+c_i=\sum_j\widehat P_{ji}-1.
+$$
+
+The update satisfies
+
+$$
+\left|\sum_j\widetilde\mu_j-\sum_i\widehat L_i\right|
+\le \sum_j B_j+\sum_i|\widehat L_i|\,|c_i|.
+$$
+
+If the incoming population itself is only approximately normalized, the bound
+relative to unit mass is
+
+$$
+\left|\sum_j\widetilde\mu_j-1\right|
+\le \sum_j B_j+\sum_i|\widehat L_i|\,|c_i|
++\left|\sum_i\widehat L_i-1\right|.
+$$
+
+When the stored input has exact unit mass and all stored columns sum exactly
+to one, only the rounding budget remains. These normalization conditions are
+explicit theorem hypotheses. The sums in these statements are **real sums of
+stored values**; computing a diagnostic total with another floating-point
+reduction introduces that reduction's own error.
+
+## Error already present in the inputs
+
+Suppose an intended real population $L$ and kernel $P$ satisfy
+
+$$
+|\widehat L_i-L_i|\le e_i,
+\qquad |\widehat P_{ji}-P_{ji}|\le d_{ji}.
+$$
+
+Then `update_error_with_input` proves
+
+$$
+\left|\widetilde\mu_j-\sum_i L_iP_{ji}\right|
+\le B_j+\sum_i\left(e_i|\widehat P_{ji}|+|L_i|d_{ji}\right).
+$$
+
+For a population-dependent transition callback, $d_{ji}$ must cover both its
+evaluation error and the effect of supplying an approximate population. This
+module does not infer that bound or assume the callback has a particular
+continuity property.
+
+## Lean entry points
+
+All theorems are in
+<SourceLink path="LeanMFG/Verification/Numerical/Population.lean">Verification/Numerical/Population.lean</SourceLink>.
+
+| Theorem | Guarantee |
+| --- | --- |
+| `update_error`, `update_l1_error` | Coordinate and total L1 rounding error |
+| `update_mass_error` | Mass drift including transition-column defects |
+| `update_mass_error_to_one` | Also includes incoming normalization error |
+| `update_mass_error_of_normalized` | Rounding-only bound under exact normalization |
+| `update_error_with_input` | Propagation of population and transition input errors |
+| `forward_error`, `forward_l1_error`, `forward_mass_error` | Bounds for the native array output |
+| `checkedForward_sound`, `checkedForward_mass_error` | Acceptance implies correct dimensions and the respective bounds |
+
+```lean
+import LeanMFG.Numerical.Population
+
+open LeanMFG.Numerical.Population
+
+#eval checkedForward 2 4
+  #[0.125, 0.375, 0.25, 0.25]
+  #[1, 0.5, 0, 0.25, 0, 0.5, 1, 0.75]
+-- some #[0.375, 0.625]
+```
+
+Run `lake build` for the proofs and
+<SourceLink path="LeanMFG/Examples/Numerical/Population.lean">executable examples</SourceLink>.
+Run `lake exe mfglib_check` for the existing full MFGLib reference suite using
+this update inside the solvers.
+
+## Scope
+
+This result covers **one transition from a supplied joint population to a state
+population**. Forming that joint population from a state law and policy,
+constructing the next joint population, verifying callback evaluation, and
+propagating error across a whole time horizon remain separate work. It does
+not establish equilibrium, convergence, or exact floating-point mass conservation.
+
+The budgets are mathematical real-valued definitions. The API returns a checked
+population, not an executable error interval. No dependencies were added for
+this step.

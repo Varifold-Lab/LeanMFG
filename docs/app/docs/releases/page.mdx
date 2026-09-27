@@ -1,0 +1,115 @@
+import { RepositoryLink } from '@/components/SourceLink'
+
+# Development and releases
+
+LeanMFG releases tie the library, dependency versions, verification evidence, and documentation to one source commit.
+
+## Development workflow
+
+**Development branch → PR checks → main → candidate checks → annotated tag → release.**
+
+Each change updates the implementation, relevant checks, documentation, and <RepositoryLink path="CHANGELOG.md">changelog</RepositoryLink>. Follow the <RepositoryLink path="CONTRIBUTING.md">contribution guide</RepositoryLink> for module placement and proof conventions.
+
+## What CI checks
+
+| Gate | Evidence |
+| --- | --- |
+| Lean build | All library modules, executable targets, and build-time guards compile |
+| Axiom audit | Imported library declarations use only the documented logical axioms |
+| Numerical checks | Pinned MFGLib reference vectors and edge/integration cases pass |
+| External installation | A fresh Git-dependent project imports the public theorem API and runs a complete solver example |
+| Version checks | Lake/docs versions agree; Lean and dependencies are pinned; candidate metadata matches the tag |
+| Documentation | MDX and TypeScript compile; repository and internal site links resolve |
+
+The **CI gate** depends on all checks. The [scope table and local commands](/docs/verification) distinguish general theorems from finite numerical tests. Solver convergence and general numerical equilibrium certification are outside the current guarantee.
+
+## One-time repository settings
+
+After the workflows are merged, a repository administrator must:
+
+1. Require pull requests and the **CI gate** status check for `main`. Require
+   the branch to be current before merging; prevent direct pushes and bypasses
+   according to the project's maintainer policy.
+2. Restrict creation of `v*` tags to release maintainers; prevent updates and
+   deletion of published tags.
+3. Set GitHub Pages' source to **GitHub Actions**. If `github-pages` restricts
+   deployment refs, permit the release tags `v*`.
+
+These are GitHub settings, not guarantees imposed by the files in this
+repository. A new checkout or fork must configure them separately.
+
+## Version policy
+
+- The package version in `lakefile.toml`, `docs/package.json`, and the root
+  entries in `docs/package-lock.json` must agree: `MAJOR.MINOR.PATCH`.
+- During `0.x`, increment MINOR for breaking APIs or incompatible Lean/mathlib/
+  FloatLib changes. PATCH is for compatible fixes. Document theorem hypothesis
+  changes and numerical behavior changes even when names are unchanged.
+- Pin the Lean release, direct dependency commits, and complete Lake/npm locks.
+  Toolchain compatibility is part of the release contract; do not promise
+  arbitrary combinations of Lean dependencies.
+- Add user-visible changes under `CHANGELOG.md`'s Unreleased heading. Do not
+  label unreleased work as a published version. Never move a published tag.
+
+## Prepare a candidate
+
+1. Make the version changes in a PR. Move the intended Unreleased entries to
+   `## [X.Y.Z] - YYYY-MM-DD`, retaining an Unreleased heading. Include added
+   capabilities, fixes, API changes, migration requirements, and known limitations.
+2. Update the [verification scope](/docs/verification), install instructions, and
+   relevant MDX pages. Run the [required checks](/docs/verification#required-checks)
+   and merge only after **CI gate** succeeds.
+3. From `main`, run the **Release** workflow manually with candidate tag
+   `vX.Y.Z`. Manual runs only validate and upload artifacts; they do not create
+   tags, Releases, or Pages deployments.
+4. Record the candidate run's exact commit. Confirm both jobs and the gate
+   passed. Download `verification-<SHA>` and `documentation-<SHA>` if needed.
+   `source.json` identifies the code, dependencies, and fixture/document hashes;
+   the other files contain audit, numerical, and downstream-client logs.
+
+The candidate gate requires a clean checkout whose commit is on `origin/main`,
+matching versions, and a dated changelog entry. Unreleased local work deliberately
+does not satisfy it.
+
+## Publish the verified commit
+
+From a clean maintainer checkout, use the exact candidate commit, not a moving
+branch tip:
+
+```sh
+git fetch origin main --tags
+git tag -a vX.Y.Z CANDIDATE_SHA -m "LeanMFG vX.Y.Z"
+git push origin vX.Y.Z
+```
+
+The tag workflow reruns the **same CI workflow** at the tagged commit. It also
+requires an annotated tag matching the package version and checkout. After
+success it:
+
+- Creates a GitHub Release with the changelog section and verification evidence.
+- Attaches `leanmfg-docs-vX.Y.Z.tar.gz`, built from that same commit.
+- Deploys that exact documentation artifact to GitHub Pages. The footer,
+  `build-info.json`, and all Lean source links identify the release commit.
+
+## Failures and corrections
+
+A failed gate blocks publication. Fix code through a PR and run a new candidate.
+If an existing tag is wrong, do not force-update it: use a new version. A Pages
+configuration failure can occur after Release creation; fix the repository
+setting and rerun the failed deployment job. Rerun failed jobs rather than
+attempting to recreate an already published Release.
+
+The workflows are based on [Lean Action](https://github.com/leanprover/lean-action),
+[reusable GitHub workflows](https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows),
+and [GitHub Pages deployment](https://github.com/actions/deploy-pages). Top-level
+action references are pinned to commits and should be reviewed when updated.
+
+## Read a version's documentation
+
+The page footer identifies the package version, commit, and whether a local build contains uncommitted changes. Repository source links point to that commit. `build-info.json` records the same identity for automated checks.
+
+The hosted site presents the latest deployed release; earlier documentation archives remain attached to their GitHub Releases. Development builds are labeled separately. There is no claim of published availability until a release workflow has actually succeeded.
+
+Native binary distributions and bit-for-bit reproducible builds are not provided yet.
+
+To install that exact library version, follow [Getting started](/docs/getting-started) and pin its source commit and toolchain.

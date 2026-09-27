@@ -1,0 +1,84 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Candidate tag, e.g. v0.1.0 (checks only; run from main)'
+        required: true
+        type: string
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: leanmfg-release
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    uses: ./.github/workflows/ci.yml
+    with:
+      release-tag: ${{ github.event_name == 'push' && github.ref_name || inputs.tag }}
+
+  publish:
+    if: github.event_name == 'push'
+    needs: verify
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: verification-${{ github.sha }}
+          path: evidence
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: documentation-${{ github.sha }}
+          path: site
+      - name: Check artifact provenance and package documentation
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          python3 - <<'PY'
+          import json, os
+          evidence = json.load(open('evidence/source.json'))
+          docs = json.load(open('site/build-info.json'))
+          assert evidence['commit'] == docs['commit'] == os.environ['GITHUB_SHA']
+          assert evidence['tag'] == docs['tag'] == os.environ['TAG']
+          assert not evidence['dirty'] and not docs['dirty']
+          PY
+          tar -czf "leanmfg-docs-$TAG.tar.gz" -C site .
+      - name: Publish release for the verified tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$TAG" --verify-tag --title "LeanMFG $TAG" \
+            --notes-file evidence/release-notes.md \
+            evidence/source.json evidence/axioms.log evidence/numerical.log \
+            evidence/downstream.log "leanmfg-docs-$TAG.tar.gz"
+
+  pages:
+    if: github.event_name == 'push'
+    needs: [verify, publish]
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: documentation-${{ github.sha }}
+          path: site
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+        with:
+          path: site
+      - uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
+        id: deployment

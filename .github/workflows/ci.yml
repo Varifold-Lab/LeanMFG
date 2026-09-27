@@ -1,0 +1,108 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      release-tag:
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  lean:
+    name: Lean, numerical checks, downstream
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Release metadata and gate tests
+        env:
+          RELEASE_TAG: ${{ inputs.release-tag }}
+        run: |
+          python3 -m unittest discover -s tests/release -v
+          args=()
+          if [[ -n "$RELEASE_TAG" ]]; then args+=(--tag "$RELEASE_TAG"); fi
+          if [[ "$GITHUB_REF_TYPE" == tag ]]; then args+=(--require-tag); fi
+          python3 scripts/check_release.py "${args[@]}" --output .artifacts/source.json --notes .artifacts/release-notes.md
+      - uses: leanprover/lean-action@50fcf42d2e460296f1a34b402e990d1b24f8b596 # v1
+        with:
+          auto-config: false
+          build: true
+          build-args: LeanMFG mfglib_check mfglib
+          use-mathlib-cache: true
+      - name: Axiom policy
+        run: lake env lean scripts/Audit.lean | tee .artifacts/axioms.log
+      - name: MFGLib numerical reference checks
+        run: .lake/build/bin/mfglib_check | tee .artifacts/numerical.log
+      - name: Install exact commit in a fresh client
+        run: python3 scripts/check_downstream.py --revision "$GITHUB_SHA" | tee .artifacts/downstream.log
+      - name: Source and lockfiles stayed fixed
+        run: |
+          git diff --exit-code
+          test -z "$(git status --porcelain --untracked-files=normal)"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: verification-${{ github.sha }}
+          path: .artifacts/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
+
+  docs:
+    name: Documentation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+      - run: npm ci
+        working-directory: docs
+      - name: Build versioned documentation
+        working-directory: docs
+        env:
+          LEANMFG_DOCS_TAG: ${{ inputs.release-tag }}
+          LEANMFG_SOURCE_REV: ${{ github.sha }}
+          NEXT_PUBLIC_BASE_PATH: /LeanMFG
+        run: npm run build
+      - name: Source and lockfile stayed fixed
+        run: |
+          git diff --exit-code
+          test -z "$(git status --porcelain --untracked-files=normal)"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: documentation-${{ github.sha }}
+          path: docs/out/
+          if-no-files-found: error
+          retention-days: 30
+
+  gate:
+    name: CI gate
+    if: always()
+    needs: [lean, docs]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Require every check
+        env:
+          LEAN_RESULT: ${{ needs.lean.result }}
+          DOCS_RESULT: ${{ needs.docs.result }}
+        run: '[[ "$LEAN_RESULT" == success && "$DOCS_RESULT" == success ]]'

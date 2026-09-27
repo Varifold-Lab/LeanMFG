@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
+    "predev": "node scripts/write-build-info.mjs",
+    "prebuild": "node scripts/write-build-info.mjs",
+    "pretypecheck": "node scripts/write-build-info.mjs",
     "dev": "next dev --webpack",
     "build": "node scripts/check-source-links.mjs && next build --webpack && node scripts/check-site-links.mjs",
     "typecheck": "tsc --noEmit"

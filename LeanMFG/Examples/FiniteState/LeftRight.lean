@@ -52,12 +52,12 @@ def allLeft : Policy State Action := fun _ => Distribution.pure 0
 theorem equilibrium_mass_left :
     (inducedTerminal game equilibriumPolicy).prob 1 = 2 / 3 := by
   norm_num [inducedTerminal, update, Distribution.bind, game, equilibriumPolicy,
-    equilibriumActionDistribution, Distribution.pure, Fin.sum_univ_succ]; decide
+    equilibriumActionDistribution, Distribution.pure, Fin.sum_univ_succ]
 
 theorem equilibrium_mass_right :
     (inducedTerminal game equilibriumPolicy).prob 2 = 1 / 3 := by
   norm_num [inducedTerminal, update, Distribution.bind, game, equilibriumPolicy,
-    equilibriumActionDistribution, Distribution.pure, Fin.sum_univ_succ]; decide
+    equilibriumActionDistribution, Distribution.pure, Fin.sum_univ_succ]
 
 private theorem equilibrium_action_value (s : State) (a : Action) :
     actionValue game (inducedTerminal game equilibriumPolicy) s a = -(2 / 3 : ℚ) := by

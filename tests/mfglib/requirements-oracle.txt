@@ -1,0 +1,7 @@
+# Python 3.12; only needed to regenerate fixtures from the pinned upstream.
+torch==2.14.0
+numpy==2.5.3
+scipy==1.18.1
+optuna==3.6.2
+osqp==0.6.7.post3
+rich==14.3.4

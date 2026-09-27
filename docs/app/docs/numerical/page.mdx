@@ -1,0 +1,124 @@
+import { SourceLink } from '@/components/SourceLink'
+
+# Numerical foundation
+
+LeanMFG pins [FloatLib](https://github.com/lean-dojo/FloatLib/tree/5f8218dc571c01d6f8bd070c65bcd0de3a40b3c5)
+at commit `5f8218dc571c01d6f8bd070c65bcd0de3a40b3c5`, using Lean 4.34.0 and
+mathlib 4.34.0. This first integration connects executable sums and dot products
+to real-valued rounding-error theorems.
+
+## What executes
+
+<SourceLink path="LeanMFG/Numerical/Binary64.lean">Binary64.lean</SourceLink>
+defines `Value := ExecFloat.Binary 11 52`, with explicit nearest-even addition
+and multiplication. These are FloatLib's configured, proof-linked software
+operations. The implementation does not use an unchecked native-FPU override.
+
+`sumFrom` accumulates from left to right. `sum` starts from positive zero.
+`dot` first rounds each product, then accumulates those products in the same
+order. There is no fused multiply-add or reassociation. In particular,
+`sumFloat #[1e16, 1, -1e16]` returns zero: the middle addition rounds away the 1.
+
+The computational port retains `Array Float` storage. Its shared
+<SourceLink path="LeanMFG/Computational/Numeric.lean">sum and dot functions</SourceLink>
+convert to the configured type, execute these reductions, and convert back.
+The conversion preserves the real interpretation; NaN payloads may be canonicalized.
+The unchecked dot helper follows `zipWith` and uses the shorter input length.
+Use `checkedDotFloat` when dimensions must be validated.
+
+## What is proved
+
+Let $v(x)$ denote the exact real value represented by a finite stored binary64
+number. If $a$ and $b$ and the rounded result are finite, FloatLib gives
+
+$$
+|v(\operatorname{add}(a,b))-(v(a)+v(b))|
+\leq \tfrac12\operatorname{ulp}_{64}(v(a)+v(b)).
+$$
+
+The analogous bound holds for multiplication. These absolute bounds include
+subnormal results and rounding to zero; no normal-range assumption is added.
+
+For $s_0=+0$ and $s_{i+1}=\operatorname{add}(s_i,x_i)$, LeanMFG proves
+
+$$
+\left|v(s_n)-\sum_{i=0}^{n-1}v(x_i)\right|
+\leq \sum_{i=0}^{n-1}\tfrac12\operatorname{ulp}_{64}(v(s_i)+v(x_i)).
+$$
+
+For a dot product, let $p_i=\operatorname{mul}(x_i,y_i)$. Its bound is the
+sum's budget on the $p_i$, plus
+
+$$
+\sum_{i=0}^{n-1}\tfrac12\operatorname{ulp}_{64}(v(x_i)v(y_i)).
+$$
+
+These bounds refer to the operations actually executed. They compare against
+the real values of the **stored inputs**, so uncertainty in input data or an
+earlier computation must be accounted for separately.
+
+The <SourceLink path="LeanMFG/Verification/Numerical/Binary64.lean">proof module</SourceLink>
+contains:
+
+| Theorem | Guarantee |
+| --- | --- |
+| `add_error`, `mul_error` | Local half-ULP bounds for the selected operations |
+| `sumFrom_error`, `sum_error` | Accumulated error for the actual left fold |
+| `dot_error` | Both multiplication and accumulation error |
+| `sumFloat_error`, `dotFloat_error` | The same guarantee through the native array wrappers |
+| `checkedSum_sound`, `checkedDot_sound` | Acceptance implies a finite result and the stated error bound |
+| `checkedDotFloat_sound` | Also guarantees equal input lengths |
+
+## Checked execution
+
+`checkedSum` and `checkedDot` return `Option Value`. They check inputs, products,
+and every intermediate accumulator. NaN, infinity, or overflow causes `none`.
+Underflow is allowed and covered by the absolute error bound. An empty reduction
+returns positive zero. The checked array dot interface additionally rejects
+mismatched lengths.
+
+```lean
+import LeanMFG.Numerical.Binary64
+
+open LeanMFG.Numerical.Binary64
+
+#eval (checkedDotFloat #[0.25, 0.75] #[2, 4]).map toFloat
+-- some 3.5
+```
+
+The error budgets are mathematical real-valued definitions used in the proofs.
+The current API returns a checked value, **not an executable numerical interval**.
+A computable, outward-rounded enclosure remains a subsequent step.
+
+## Checks and scope
+
+```sh
+lake exe cache get
+lake build LeanMFG mfglib_check mfglib
+lake exe mfglib_check
+```
+
+The cache command retrieves mathlib artifacts; the first build also compiles
+the required FloatLib modules and native objects. Subsequent builds reuse them.
+
+<SourceLink path="LeanMFG/Examples/Numerical/Binary64.lean">Build-time guards</SourceLink>
+cover exact reductions, order-sensitive cancellation, a nearest-even tie,
+subnormals, underflow, empty inputs, NaN, infinity, intermediate overflow, and
+dimension mismatch. The file also prints the main theorems' axiom dependencies.
+The MFGLib suite checks the shared primitives in their existing solver callers.
+
+On this integration, all 20 numerical guards and all 358 MFGLib reference
+vectors (43,352 scalar comparisons), plus the existing edge/integration checks,
+pass. The audited theorems depend only on `propext`, `Classical.choice`, and
+`Quot.sound`; no additional axioms or unfinished proofs were introduced.
+
+Native Dual arithmetic, exponentials, division, square roots, normalization,
+and handwritten accumulation loops are not covered by these primitive proofs.
+The [one-step population update](/docs/numerical/population) now composes them
+into coordinate, L1, and total-mass error bounds, including input perturbations.
+Bellman values, multi-step propagation, and exploitability for the numerical
+port remain separate work.
+
+FloatLib's current native bridges cover selected operations; LeanMFG does not
+assume a native multiplication theorem. Both products and additions here use
+the configured operations with their explicit semantic bridges.

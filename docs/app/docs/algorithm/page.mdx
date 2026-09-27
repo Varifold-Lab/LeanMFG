@@ -4,6 +4,10 @@ import { SourceLink } from '@/components/SourceLink'
 
 Algorithm modules contain computations that can run. Their correctness statements live in [Verification](/docs/verification).
 
+## General finite-horizon solvers
+
+The [MFGLib numerical workflow](/docs/computational) implements Fictitious Play, Online Mirror Descent, Prior Descent, MFOMO, and Occupation Measure Inclusion in `LeanMFG/Computational/Algorithms/`. It supports general finite state and action shapes, time-indexed policies, and population-dependent transition probabilities. These solvers have numerical reference checks; their correctness and convergence proofs are deferred.
+
 ## Three-action static game
 
 <SourceLink path="LeanMFG/Algorithm/Static/RockPaperScissors.lean"><code>bestResponse</code></SourceLink> compares the three pure-action rewards and chooses a maximum. Ties are resolved Rock, then Paper, then Scissors. `exploitability` subtracts the population strategy's own reward from the best pure-action reward. `checkEpsilonEquilibrium` checks nonnegative ε and exploitability at most ε.
@@ -12,4 +16,4 @@ Algorithm modules contain computations that can run. Their correctness statement
 
 <SourceLink path="LeanMFG/Algorithm/FiniteState/OneStep.lean"><code>bestAction</code></SourceLink> selects a maximizing action at each state. `bestResponse` assembles these selections into a deterministic policy. The executable exploitability and ε-equilibrium checker evaluate a unilateral policy deviation against the population induced by the candidate policy.
 
-The current finite-state update is executable and defined in [Model](/docs/model). It is a population evolution rule, not a general equilibrium iteration solver. No convergence or discretization error theorem is claimed for the current algorithms.
+This rational finite-state update is executable and defined in [Model](/docs/model). The general numerical iteration solvers are documented above. No convergence or discretization error theorem is claimed for those numerical algorithms.

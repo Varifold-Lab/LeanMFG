@@ -1,6 +1,8 @@
+import { SourceLink } from '@/components/SourceLink'
+
 # Finite static games
 
-`LeanMFG.Model.Static.Basic` uses a finite action type, rational probabilities, and
+<SourceLink path="LeanMFG/Model/Static/Basic.lean">The finite static model</SourceLink> uses a finite action type, rational probabilities, and
 rational rewards. A `Distribution Action` contains a probability function and
 proofs that its entries are nonnegative and sum to one. The finite sums and
 their algebraic properties come from mathlib. This representation keeps exact
@@ -24,7 +26,7 @@ of rational equilibria.
 
 ## RPS compatibility
 
-`LeanMFG.Model.Static.RockPaperScissorsAdapter` defines `RPS.staticGame` and conversions
+<SourceLink path="LeanMFG/Model/Static/RockPaperScissorsAdapter.lean">The RPS adapter</SourceLink> defines `RPS.staticGame` and conversions
 `RPS.Distribution.toStatic` and `RPS.Distribution.ofStatic`. Both round trips
 are proved to be identities. Expected rewards agree, and
 `RPS.isEquilibrium_iff_static` and `RPS.isEpsilonEquilibrium_iff_static` transfer
@@ -33,7 +35,7 @@ current tie-breaking rules; generic best-response selection is a later step.
 
 ## Examples and validation
 
-`LeanMFG.Examples.Static.Congestion` proves that the balanced population in a two-action
+<SourceLink path="LeanMFG/Examples/Static/Congestion.lean">The congestion example</SourceLink> proves that the balanced population in a two-action
 congestion game is an equilibrium and that a concentrated population is not.
 It also checks a single-action game with negative rewards, exclusion of negative
 ε, and the original RPS uniform equilibrium through the adapter. `#guard` checks
@@ -41,7 +43,5 @@ evaluate concrete expected rewards using exact rational arithmetic.
 
 Run `lake build` to check all modules, including these examples and the existing
 HJB development. The library's `warningAsError` setting rejects `sorry` warnings.
-The GitHub workflow uses [Lean Action](https://github.com/leanprover/lean-action)
-to obtain the pinned environment, fetch the mathlib cache, and build the library.
-Remote workflow success must be checked after pushing; adding this file does not
-configure branch protection.
+See [Verification](/docs/verification) for the full proof/test scope and
+[Development and releases](/docs/releases) for CI and branch protection settings.
