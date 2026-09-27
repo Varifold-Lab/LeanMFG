@@ -7,6 +7,7 @@ is not a published release. The package currently prepares its first `0.1.0` rel
 
 ### Added
 
+- A reusable `Distribution.expect_pure` lemma for deterministic finite-state distributions.
 - Automatic GitHub Pages publication of the MDX documentation from `main`.
 - General rational finite static games with pure-deviation equilibrium
   characterization, a proved RPS adapter, and congestion/single-action examples.
