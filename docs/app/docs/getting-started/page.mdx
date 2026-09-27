@@ -1,57 +1,37 @@
+import { Tabs } from '@/components/Tabs'
+import { CodeBlock } from '@/components/CodeBlock'
 import { RepositoryLink } from '@/components/SourceLink'
+import buildInfo from '@/lib/build-info.json'
 
-# Getting started
+# Installation
 
-LeanMFG uses Lean 4.34.0 with pinned mathlib and FloatLib revisions. The documentation is a separate Next.js application whose content is written in MDX.
+LeanMFG requires Lean 4.34.0. Install [elan](https://github.com/leanprover/elan), which selects the toolchain recorded by a Lean project. The numerical library runs on the CPU and does not require Python.
 
-## Check the Lean library
+## Install the library
 
-Install [elan](https://github.com/leanprover/elan), then run from the repository root:
+<Tabs labels={['Repository checkout', 'Existing Lake project']}>
+<section>
 
-```sh
-lake exe cache get
-lake build
+Use a repository checkout to run the command-line solver and examples. These commands select the source commit used for this documentation:
+
+<CodeBlock language="sh" code={`git clone https://github.com/Varifold-Lab/LeanMFG.git\ncd LeanMFG\ngit checkout ${buildInfo.commit}\nlake exe cache get\nlake build LeanMFG mfglib mfglib_check`} />
+
+The cache command downloads compiled mathlib artifacts. The first build also compiles the required FloatLib modules.
+
+</section>
+<section>
+
+Use the matching `lean-toolchain` in your project:
+
+```text
+leanprover/lean4:v4.34.0
 ```
 
-The cache command downloads precompiled mathlib artifacts. The first build also compiles the required FloatLib modules. `lake build` checks the theorem proofs and evaluates the executable `#guard` examples. A failed guard fails the build.
+Add LeanMFG to your `lakefile.toml`:
 
-## Run the MFGLib port
+<CodeBlock language="toml" code={`[[require]]\nname = "leanmfg"\ngit = "https://github.com/Varifold-Lab/LeanMFG.git"\nrev = "${buildInfo.commit}"`} />
 
-```sh
-lake exe mfglib_check
-lake exe mfglib left_right omd 20
-```
-
-The first command compares numerical outputs with committed upstream reference data. The second runs Online Mirror Descent and emits a JSON solution history. The [port guide](/docs/computational) covers all ten environments, five solver families, configuration, tuning, and numerical backend differences. Neither command requires Python.
-
-## Run this documentation locally
-
-Use Node.js 24.14.0, pinned in `.node-version` and used by CI. From the repository root:
-
-```sh
-cd docs
-npm ci
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000). `npm run build` checks the MDX pages and produces a static site in `docs/out/`; `npm run typecheck` checks TypeScript.
-
-The documentation navigation follows the library's [Model](/docs/model), [Theory](/docs/theory), [Algorithm](/docs/algorithm), [Verification](/docs/verification), and worked example layers. A source link in an MDX page is checked against the local Lean file during the documentation build, so a moved module cannot silently leave a stale source link.
-
-The site is configured for static export. For hosting under a repository subpath such as `/LeanMFG`, set `NEXT_PUBLIC_BASE_PATH=/LeanMFG` when building. [Release builds](/docs/releases) record their version and source commit and deploy that same artifact.
-
-## Use LeanMFG as a dependency
-
-Choose a published version's source commit, or a reviewed development commit before the first release. Copy that commit's `lean-toolchain` into a new Lake project and add the following to `lakefile.toml`. Replace `COMMIT_SHA` with the full 40-character commit; it is a placeholder, not a branch name.
-
-```toml
-[[require]]
-name = "leanmfg"
-git = "https://github.com/Varifold-Lab/LeanMFG.git"
-rev = "COMMIT_SHA"
-```
-
-Then resolve dependencies and build:
+Resolve and build the dependencies:
 
 ```sh
 lake update
@@ -59,7 +39,14 @@ lake exe cache get
 lake build
 ```
 
-Use `import LeanMFG` in your Lean files. For example:
+Commit the generated `lake-manifest.json`. Use the selected LeanMFG commit's mathlib and FloatLib versions together.
+
+</section>
+</Tabs>
+
+## Check an import
+
+This example uses a proved equilibrium statement:
 
 ```lean
 import LeanMFG
@@ -68,6 +55,20 @@ example : LeanMFG.RPS.IsEquilibrium LeanMFG.RPS.uniform :=
   LeanMFG.RPS.uniform_equilibrium
 ```
 
-The <RepositoryLink path="tests/downstream/Main.lean">complete downstream example</RepositoryLink> also runs Online Mirror Descent, checks the solver history and improvement, and computes the resulting population. CI builds and runs this client from a fresh Git installation. It reuses only the pinned transitive dependency caches, rebuilding LeanMFG itself.
+For numerical code, use `import LeanMFG.Computational`. The <RepositoryLink path="tests/downstream/Main.lean">downstream client</RepositoryLink> exercises both interfaces in a fresh Lake project during CI.
 
-Use the selected commit's dependency versions together. An unrelated mathlib or FloatLib revision in a parent project is not a supported compatibility combination. Commit the downstream project's generated `lake-manifest.json`.
+## Run a solver
+
+From a repository checkout:
+
+```sh
+lake exe mfglib left_right omd 20
+```
+
+Continue with [Run a first solver](/docs/quickstart) to read the output and call the solver from Lean.
+
+## Dependency changes
+
+The package's Lean toolchain and dependency commits form a tested combination. When upgrading LeanMFG, update the toolchain and resolve the dependency manifest together. The [release guide](/docs/releases) describes compatibility changes between versions.
+
+Instructions for editing this website are in [Contributing](/docs/contributing).

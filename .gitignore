@@ -6,3 +6,4 @@
 __pycache__/
 docs/lib/build-info.json
 docs/public/build-info.json
+docs/lib/search-index.json

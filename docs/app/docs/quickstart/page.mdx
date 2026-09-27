@@ -1,0 +1,64 @@
+import { LeanSnippet } from '@/components/LeanSource'
+
+# Run a first solver
+
+This example runs Online Mirror Descent on the built-in Left/Right environment. Complete the [installation](/docs/getting-started) first, then run commands from the LeanMFG checkout.
+
+## Run from the command line
+
+```sh
+lake exe mfglib left_right omd 20
+```
+
+The arguments select the environment, algorithm, and maximum iteration count. The command writes a JSON object with these fields:
+
+| Field | Meaning |
+| --- | --- |
+| `environment` | Name of the selected environment |
+| `shape` | Policy dimensions: time, state, action |
+| `bestIndex` | Index of the smallest recorded exploitability |
+| `result.policies` | Initial policy followed by each computed policy |
+| `result.exploitabilities` | Exploitability for each stored policy |
+| `result.runtimes` | Elapsed seconds at each iteration |
+| `result.stoppedEarly` | Whether the stopping tolerance was reached |
+
+The default stopping tolerance can end a run before iteration 20. [SolveOptions](/docs/reference#solveoptions) describes the stopping rule.
+
+## Call the solver from Lean
+
+The following program disables early stopping, runs 20 updates, and inspects the best recorded policy. The initial policy is uniform because the `pi0` argument is `none`.
+
+<LeanSnippet path="docs/examples/Solve.lean" />
+
+Run the same file with:
+
+```sh
+lake env lean --run docs/examples/Solve.lean
+```
+
+Output:
+
+```text
+Policy shape: #[2, 3, 2]
+Stored policies: 21
+Initial exploitability: 0.250000
+Best iteration: 20
+Best exploitability: 0.008187
+```
+
+The result contains 21 policies: the initial policy and 20 updates. `result.policies[result.bestIndex]!` selects the policy with the lowest recorded score. The [solver reference](/docs/reference) describes the result type and error cases.
+
+## Interpret exploitability
+
+For a policy $\pi$, the library first computes its population flow. It then holds that flow fixed and compares the best-response value with the value of $\pi$. The difference is the exploitability score.
+
+A smaller score indicates a smaller estimated gain from a unilateral deviation. This numerical score is computed in binary64 arithmetic; the solver does not return a proved equilibrium certificate. See [verification and tests](/docs/verification) for the current guarantees.
+
+## Change the environment or algorithm
+
+```sh
+lake exe mfglib --list
+lake exe mfglib susceptible_infected fp 10
+```
+
+The algorithm names are `fp`, `omd`, `pd`, `mfomo`, and `omi`. For constructor parameters and saved configurations, see the [finite-horizon guide](/docs/computational).

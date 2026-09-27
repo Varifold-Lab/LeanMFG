@@ -19,7 +19,7 @@ operations. The implementation does not use an unchecked native-FPU override.
 order. There is no fused multiply-add or reassociation. In particular,
 `sumFloat #[1e16, 1, -1e16]` returns zero: the middle addition rounds away the 1.
 
-The computational port retains `Array Float` storage. Its shared
+The computational layer retains `Array Float` storage. Its shared
 <SourceLink path="LeanMFG/Computational/Numeric.lean">sum and dot functions</SourceLink>
 convert to the configured type, execute these reductions, and convert back.
 The conversion preserves the real interpretation; NaN payloads may be canonicalized.
@@ -117,7 +117,7 @@ and handwritten accumulation loops are not covered by these primitive proofs.
 The [one-step population update](/docs/numerical/population) now composes them
 into coordinate, L1, and total-mass error bounds, including input perturbations.
 Bellman values, multi-step propagation, and exploitability for the numerical
-port remain separate work.
+implementation remain separate work.
 
 FloatLib's current native bridges cover selected operations; LeanMFG does not
 assume a native multiplication theorem. Both products and additions here use

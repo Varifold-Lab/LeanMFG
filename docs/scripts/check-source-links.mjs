@@ -12,7 +12,7 @@ function inspect(directory) {
       inspect(file)
     } else if (entry.name.endsWith('.mdx')) {
       const content = readFileSync(file, 'utf8')
-      for (const [, component, source] of content.matchAll(/<(SourceLink|RepositoryLink)\s+path="([^"]+)"/g)) {
+      for (const [, component, , source] of content.matchAll(/<(SourceLink|RepositoryLink|LeanSnippet|Declaration)\b([^>]*?)\bpath="([^"]+)"/g)) {
         if (source.startsWith('/') || source.split('/').includes('..') ||
             (component === 'SourceLink' && (!source.startsWith('LeanMFG/') || !source.endsWith('.lean')))) {
           throw new Error(`Invalid source link in ${file}: ${source}`)

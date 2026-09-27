@@ -21,7 +21,7 @@ Each change updates the implementation, relevant checks, documentation, and <Rep
 | Version checks | Lake/docs versions agree; Lean and dependencies are pinned; candidate metadata matches the tag |
 | Documentation | MDX and TypeScript compile; repository and internal site links resolve |
 
-The **CI gate** depends on all checks. The [scope table and local commands](/docs/verification) distinguish general theorems from finite numerical tests. Solver convergence and general numerical equilibrium certification are outside the current guarantee.
+The **CI gate** depends on the applicable checks. Documentation-only PRs build the library and site and run the documented Lean example. Changes to library code, dependencies, scripts, or tests run the full suite above, as do pushes to `main` and release runs. The [scope table and local commands](/docs/verification) distinguish general theorems from finite numerical tests. Solver convergence and general numerical equilibrium certification are outside the current guarantee.
 
 ## One-time repository settings
 
@@ -33,7 +33,7 @@ After the workflows are merged, a repository administrator must:
 2. Restrict creation of `v*` tags to release maintainers; prevent updates and
    deletion of published tags.
 3. Set GitHub Pages' source to **GitHub Actions**. If `github-pages` restricts
-   deployment refs, permit the release tags `v*`.
+   deployment refs, permit `main`.
 
 These are GitHub settings, not guarantees imposed by the files in this
 repository. A new checkout or fork must configure them separately.
@@ -88,16 +88,27 @@ success it:
 
 - Creates a GitHub Release with the changelog section and verification evidence.
 - Attaches `leanmfg-docs-vX.Y.Z.tar.gz`, built from that same commit.
-- Deploys that exact documentation artifact to GitHub Pages. The footer,
-  `build-info.json`, and all Lean source links identify the release commit.
+- Records the release commit in the archived documentation's footer,
+  `build-info.json`, and Lean source links.
+
+## Publish the documentation site
+
+The [official site](https://varifold-lab.github.io/LeanMFG/) tracks `main`.
+The <RepositoryLink path=".github/workflows/pages.yml">Documentation site workflow</RepositoryLink>
+builds and checks the MDX site after each push to `main`, then deploys the static
+output to GitHub Pages. It can also be rerun manually from `main`.
+
+The live site identifies its source commit and labels untagged builds as development
+documentation. Publishing the site does not create a library release. Tagged
+documentation remains available in each GitHub Release's archive.
 
 ## Failures and corrections
 
 A failed gate blocks publication. Fix code through a PR and run a new candidate.
-If an existing tag is wrong, do not force-update it: use a new version. A Pages
-configuration failure can occur after Release creation; fix the repository
-setting and rerun the failed deployment job. Rerun failed jobs rather than
-attempting to recreate an already published Release.
+If an existing tag is wrong, do not force-update it: use a new version. For a Pages
+configuration failure, fix the repository setting and rerun the failed
+Documentation site job. Rerun failed Release jobs rather than attempting to
+recreate an already published Release.
 
 The workflows are based on [Lean Action](https://github.com/leanprover/lean-action),
 [reusable GitHub workflows](https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows),
@@ -108,7 +119,7 @@ action references are pinned to commits and should be reviewed when updated.
 
 The page footer identifies the package version, commit, and whether a local build contains uncommitted changes. Repository source links point to that commit. `build-info.json` records the same identity for automated checks.
 
-The hosted site presents the latest deployed release; earlier documentation archives remain attached to their GitHub Releases. Development builds are labeled separately. There is no claim of published availability until a release workflow has actually succeeded.
+The hosted site presents the latest deployed `main` commit. Versioned documentation archives remain attached to their GitHub Releases.
 
 Native binary distributions and bit-for-bit reproducible builds are not provided yet.
 

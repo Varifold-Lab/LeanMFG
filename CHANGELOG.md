@@ -7,6 +7,7 @@ is not a published release. The package currently prepares its first `0.1.0` rel
 
 ### Added
 
+- Automatic GitHub Pages publication of the MDX documentation from `main`.
 - General rational finite static games with pure-deviation equilibrium
   characterization, a proved RPS adapter, and congestion/single-action examples.
 
@@ -27,6 +28,9 @@ is not a published release. The package currently prepares its first `0.1.0` rel
 
 ### Changed
 
+- Documentation now includes a runnable solver tutorial, source-derived API
+  signatures, local search, copyable code, keyboard-accessible installation
+  tabs, and page contents navigation.
 - Lean moves from `4.34.0-rc2` to `4.34.0`; mathlib is pinned to
   `5ed2965256430c3649e86755f9576b54eca72435` and FloatLib to
   `5f8218dc571c01d6f8bd070c65bcd0de3a40b3c5`.

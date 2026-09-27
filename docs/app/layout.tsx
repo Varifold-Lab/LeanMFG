@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import buildInfo from '@/lib/build-info.json'
+import { DocSearch } from '@/components/DocSearch'
 import 'katex/dist/katex.min.css'
 import './globals.css'
 
@@ -17,15 +18,15 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body>
+        <a className="skip-link" href="#main-content">Skip to content</a>
         <header className="site-header">
           <div className="header-inner">
             <Link className="brand" href="/" aria-label="LeanMFG documentation home">
-              <span className="brand-mark" aria-hidden="true">λ</span>
               <span>LeanMFG</span>
-              <span className="brand-suffix">/ docs</span>
+              <span className="brand-suffix">documentation</span>
             </Link>
             <div className="header-links">
-              <Link href="/docs/architecture">Documentation</Link>
+              <DocSearch />
               <a href="https://github.com/Varifold-Lab/LeanMFG">GitHub ↗</a>
             </div>
           </div>
