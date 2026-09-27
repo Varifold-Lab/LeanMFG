@@ -1,9 +1,14 @@
 # Changelog
 
 User-visible changes are recorded here before merge. An entry under Unreleased
-is not a published release. The package currently prepares its first `0.1.0` release.
+is not a published release.
 
 ## [Unreleased]
+
+## [0.1.0] - 2026-09-27
+
+Initial release. Requires Lean 4.34.0 and the dependency revisions pinned in
+`lakefile.toml` and `lake-manifest.json`.
 
 ### Added
 
@@ -53,7 +58,7 @@ is not a published release. The package currently prepares its first `0.1.0` rel
 
 - Downstream projects must use the pinned Lean toolchain and compatible
   dependency revisions. No stable API or compatibility with the earlier rc2
-  toolchain is promised for this initial release candidate.
+  toolchain is promised for this initial release.
 - The numerical backend uses CPU binary64 arrays. GPU execution, arbitrary
   PyTorch optimizers, and Optuna persistence/TPE are not implemented. OMI uses
   a native Dykstra projection rather than OSQP.
