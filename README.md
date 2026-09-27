@@ -1,9 +1,6 @@
 # LeanMFG
 
 [![Documentation](https://img.shields.io/badge/docs-LeanMFG-blue)](https://varifold-lab.github.io/LeanMFG/)
-[![CI](https://github.com/Varifold-Lab/LeanMFG/actions/workflows/ci.yml/badge.svg)](https://github.com/Varifold-Lab/LeanMFG/actions/workflows/ci.yml)
-[![Lean 4](https://img.shields.io/badge/Lean-4-blue)](https://lean-lang.org/)
-[![Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 
 LeanMFG is a Lean 4 library for mean field games, covering mathematical models,
 theory, algorithms, and formal verification.
