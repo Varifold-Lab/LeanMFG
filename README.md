@@ -1,12 +1,12 @@
 # LeanMFG
 
-**A Lean 4 counterpart to MFGLib's MFG workflow, extended with mathematical theory and verified algorithms.**
+**Formal mean field games in Lean 4.**
 
-LeanMFG uses [MFGLib](https://github.com/radar-research-lab/MFGLib) as the functional baseline for finite MFGs: environments, policies, population evolution, scoring, solvers, and examples. LeanMFG adds formal definitions and proofs of mathematical properties, program correctness, and model invariants. The intended chain is:
+LeanMFG is an independent library connecting mean field game models, mathematical theory, executable algorithms, and formal verification:
 
 > Model definitions → mathematical properties → algorithms → algorithm guarantees → application constraints.
 
-The [native MFGLib port](docs/app/docs/computational/page.mdx) implements the general finite-horizon model, all ten environments, five solver families, scoring, and native tuning. It is checked against a pinned upstream version. [FloatLib-backed reductions](docs/app/docs/numerical/page.mdx) and [one-step population updates](docs/app/docs/numerical/population/page.mdx) have proved error bounds; whole-solver correctness remains future work. Other proved cases cover static rock-paper-scissors, a rational one-step Left/Right game, and classical HJB verification.
+Proved results cover static rock-paper-scissors, a rational one-step Left/Right game, classical HJB verification, [binary64 reductions](docs/app/docs/numerical/page.mdx), and [population-update error bounds](docs/app/docs/numerical/population/page.mdx). The [finite-horizon numerical layer](docs/app/docs/computational/page.mdx) provides ten environments, five solver families, scoring, and tuning, with numerical reference checks. Whole-solver correctness remains future work.
 
 The [finite static model](docs/app/docs/model/static/page.mdx) supports any finite nonempty action type with rational probabilities and rewards. It includes a proved RPS adapter and congestion and single-action examples.
 
@@ -47,3 +47,7 @@ Open `http://localhost:3000`. Run `npm run build` to check the pages and produce
 PR checks cover Lean builds, axiom auditing, numerical reference tests, external installation, and documentation. See [verification scope](docs/app/docs/verification/page.mdx) for implemented, tested, and proved capabilities. [CHANGELOG.md](CHANGELOG.md) records changes; the [release guide](docs/app/docs/releases/page.mdx) describes candidate checks and publication from a fixed commit.
 
 Contributions are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md). LeanMFG is licensed under [Apache-2.0](LICENSE), with [third-party notices](NOTICE) for adapted material.
+
+## References
+
+[MFGLib](https://github.com/radar-research-lab/MFGLib) is a major reference for the current finite-horizon environments, numerical algorithms, and comparison tests. Mathematical literature and other related libraries are listed in the [references](docs/app/docs/references/page.mdx).

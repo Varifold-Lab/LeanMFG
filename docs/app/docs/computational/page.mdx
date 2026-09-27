@@ -2,10 +2,12 @@ import { SourceLink, RepositoryLink } from '@/components/SourceLink'
 
 # Finite-horizon games
 
-`LeanMFG.Computational` implements the finite-horizon numerical workflow of
-[MFGLib 0.3.0](https://github.com/radar-research-lab/MFGLib/tree/d4adccf134e88ad47e0a517af5175edaec15a30f).
-The baseline is pinned to commit `d4adccf134e88ad47e0a517af5175edaec15a30f`.
-These modules execute natively in Lean. The solver reference checks are numerical
+`LeanMFG.Computational` provides finite-horizon environments, policies, population
+evolution, Bellman recursion, numerical solvers, and tuning. These modules execute
+natively in Lean. The current environments and solvers draw on
+[MFGLib 0.3.0](https://github.com/radar-research-lab/MFGLib/tree/d4adccf134e88ad47e0a517af5175edaec15a30f),
+with numerical comparisons pinned to commit `d4adccf134e88ad47e0a517af5175edaec15a30f`.
+The solver reference checks are numerical
 tests. The shared [sum and dot-product primitives](/docs/numerical) have formal
 rounding-error bounds; correctness and convergence of whole solvers remain open.
 
@@ -56,7 +58,7 @@ rounding decision, following the upstream implementation.
 
 ## Capability map
 
-| MFGLib feature | Lean entry point | Status |
+| Capability | Lean entry point | Implementation |
 | --- | --- | --- |
 | Environments and time-dependent callbacks | `Environment`, `Environments` | All ten built-in models implemented |
 | Policy build, uniform, stationary, greedy | `Policy`, `greedyPolicyGivenMeanField` | Includes equal probability over tied maximizers |
@@ -190,7 +192,7 @@ fixtures use PyTorch's scalar CPU float32 sampling convention, reproduced by
   Lean configuration rather than inherited from outer stopping tolerances.
 - **Optimization and tuning:** Adam and SGD are implemented, including SGD
   momentum. Arbitrary PyTorch optimizers and Optuna's TPE sampler, study database,
-  pruning, and Python serialization formats remain outside this port. Native
+  pruning, and Python serialization formats remain outside this implementation. Native
   candidate search, seeded random search, frozen parameters, metrics, and JSON
   provide the corresponding basic workflow.
 - **Stable arithmetic:** softmax and prior updates subtract a maximum before
@@ -207,7 +209,7 @@ fixtures use PyTorch's scalar CPU float32 sampling convention, reproduced by
   error bounds](/docs/numerical), conditional on finite inputs and intermediates.
   The [one-step population update](/docs/numerical/population) composes them into
   forward-error and mass-drift bounds, including explicit input perturbations.
-  The port has no whole-solver correctness, convergence, equilibrium-existence,
+  The numerical implementation has no whole-solver correctness, convergence, equilibrium-existence,
   or discretization-error theorems.
   `rMax` follows the upstream numerical scale and is not a certified bound.
   Existing rational and continuous proofs remain available in their original
