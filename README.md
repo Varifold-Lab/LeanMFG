@@ -8,6 +8,8 @@ LeanMFG uses [MFGLib](https://github.com/radar-research-lab/MFGLib) as the funct
 
 The [native MFGLib port](docs/app/docs/computational/page.mdx) implements the general finite-horizon model, all ten environments, five solver families, scoring, and native tuning. It is checked against a pinned upstream version. [FloatLib-backed reductions](docs/app/docs/numerical/page.mdx) and [one-step population updates](docs/app/docs/numerical/population/page.mdx) have proved error bounds; whole-solver correctness remains future work. Other proved cases cover static rock-paper-scissors, a rational one-step Left/Right game, and classical HJB verification.
 
+The [finite static model](docs/app/docs/model/static/page.mdx) supports any finite nonempty action type with rational probabilities and rewards. It includes a proved RPS adapter and congestion and single-action examples.
+
 ## Build
 
 Install [elan](https://github.com/leanprover/elan), then run:
@@ -22,6 +24,8 @@ lake exe mfglib left_right omd 20
 Lean 4.34.0, mathlib, and FloatLib revisions are pinned. `lake build` checks the proofs and executable examples; `mfglib_check` checks numerical reference data and edge cases without Python.
 
 To use LeanMFG from another Lake project, follow the [installation guide](docs/app/docs/getting-started/page.mdx). Pin a source commit and use its Lean toolchain and dependency revisions.
+
+Library warnings are treated as errors, including unfinished proofs using `sorry`. The [Lean workflow](.github/workflows/lean.yml) checks pushes and pull requests using the pinned toolchain and dependencies.
 
 ## Documentation
 

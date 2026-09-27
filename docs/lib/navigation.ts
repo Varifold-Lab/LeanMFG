@@ -12,6 +12,7 @@ export const documentation = [
     title: 'Library layers',
     items: [
       { title: 'Model', href: '/docs/model' },
+      { title: 'Finite static games', href: '/docs/model/static' },
       { title: 'Theory', href: '/docs/theory' },
       { title: 'Algorithm', href: '/docs/algorithm' },
       { title: 'Numerical foundation', href: '/docs/numerical' },

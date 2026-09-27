@@ -14,6 +14,7 @@ the source commit and input hashes; successful CI logs record which gates ran.
 
 | Component | Implemented | Checked by examples/reference tests | Formally proved | Boundary |
 | --- | --- | --- | --- | --- |
+| General rational finite static game | Distribution, reward, exact/approximate equilibrium definitions; RPS adapter | Congestion, single-action and RPS guards | Pure/mixed reward bounds, pure-deviation characterization, zero-tolerance equivalence, RPS conversion and equilibrium equivalences | Finite nonempty action types; no generic best-response implementation or rational equilibrium existence theorem |
 | Static rational rock-paper-scissors | Best response, exploitability, equilibrium checker | Build-time guards | Best-response optimality, checker equivalence, uniform equilibrium and uniqueness | Three actions and rational mixed strategies |
 | Rational one-step finite-state game | Forward update and equilibrium checker | Left/Right guards | Nonnegativity/mass conservation, including repeated updates; optimal response and checker equivalence | Existing rational model, not the general numerical port |
 | Continuous deterministic control | Problem, paths, HJB candidate definitions | Worked quadratic example | Classical verification and optimal feedback for the example | Explicit smoothness/integrability assumptions; no coupled dynamic MFG result |

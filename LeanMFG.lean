@@ -15,3 +15,6 @@ import LeanMFG.Examples.FiniteState.LeftRight
 import LeanMFG.Computational
 import LeanMFG.Examples.Numerical.Binary64
 import LeanMFG.Examples.Numerical.Population
+import LeanMFG.Model.Static.Basic
+import LeanMFG.Model.Static.RockPaperScissorsAdapter
+import LeanMFG.Examples.Static.Congestion

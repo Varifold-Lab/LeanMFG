@@ -7,6 +7,9 @@ is not a published release. The package currently prepares its first `0.1.0` rel
 
 ### Added
 
+- General rational finite static games with pure-deviation equilibrium
+  characterization, a proved RPS adapter, and congestion/single-action examples.
+
 - General finite-horizon MFGLib workflow: all ten environments, five solver
   families, population evolution, Bellman recursion, exploitability, tuning,
   JSON configuration, and the `mfglib` command.
