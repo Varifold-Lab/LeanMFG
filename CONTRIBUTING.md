@@ -16,9 +16,9 @@ Reusable floating-point operations live in `LeanMFG/Numerical/`, with their proo
 
 State assumptions and the domain of quantification in theorem statements and documentation. Connect algorithm proofs to the executable definitions they certify. Use `#guard` for concrete executable examples; it does not replace a general proof. Please do not introduce `sorry`, `admit`, or new axioms to bypass a proof in library modules.
 
-Keep documentation links and imports current when moving modules. The documentation source is in `docs/app/`; after editing MDX, run `npm ci` once in `docs/` and then `npm run build`. The documentation build checks links to Lean source files. A new application example should identify the agents, states, actions, population law, and objective, and should distinguish invariants from equilibrium conditions.
+Keep documentation links and imports current when moving modules. The documentation source is in `docs/app/`; after editing MDX, run `npm ci` once in `docs/` and then `npm run build`. The documentation build checks source and internal links. Use the shared MDX components for source-derived declarations and runnable examples; the [documentation authoring guide](docs/app/docs/contributing/page.mdx) describes the conventions. A new application example should identify the agents, states, actions, population law, and objective, and should distinguish invariants from equilibrium conditions.
 
-When adding a capability inspired by MFGLib, document which MFGLib concept it corresponds to, the assumptions and data representation used in Lean, and any deliberate difference. Update the [capability map](docs/app/docs/architecture/page.mdx) only after the implementation and its claimed guarantees are checked.
+When adding a capability inspired by MFGLib, document which MFGLib concept it corresponds to, the assumptions and data representation used in Lean, and any deliberate difference. Update the [capability map](docs/app/docs/computational/page.mdx) only after the implementation and its claimed guarantees are checked.
 
 ## Proposing changes
 

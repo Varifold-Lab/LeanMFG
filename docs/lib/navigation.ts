@@ -1,38 +1,29 @@
 export const documentation = [
-  {
-    title: 'Start',
-    items: [
-      { title: 'Overview', href: '/' },
-      { title: 'Getting started', href: '/docs/getting-started' },
-      { title: 'Architecture', href: '/docs/architecture' },
-      { title: 'MFGLib in Lean', href: '/docs/computational' },
-    ],
-  },
-  {
-    title: 'Library layers',
-    items: [
-      { title: 'Model', href: '/docs/model' },
-      { title: 'Finite static games', href: '/docs/model/static' },
-      { title: 'Theory', href: '/docs/theory' },
-      { title: 'Algorithm', href: '/docs/algorithm' },
-      { title: 'Numerical foundation', href: '/docs/numerical' },
-      { title: 'Verification', href: '/docs/verification' },
-    ],
-  },
-  {
-    title: 'Worked cases',
-    items: [
-      { title: 'Rock · Paper · Scissors', href: '/docs/examples/rock-paper-scissors' },
-      { title: 'Finite-state Left/Right', href: '/docs/examples/finite-state-left-right' },
-      { title: 'Classical HJB', href: '/docs/examples/hjb' },
-      { title: 'Numerical population update', href: '/docs/numerical/population' },
-    ],
-  },
-  {
-    title: 'Project',
-    items: [
-      { title: 'Development and releases', href: '/docs/releases' },
-      { title: 'References', href: '/docs/references' },
-    ],
-  },
+  { title: 'Getting started', items: [
+    { title: 'Overview', href: '/' },
+    { title: 'Installation', href: '/docs/getting-started' },
+    { title: 'First solver', href: '/docs/quickstart' },
+  ] },
+  { title: 'Using LeanMFG', items: [
+    { title: 'Finite-horizon games', href: '/docs/computational' },
+    { title: 'Solver API', href: '/docs/reference' },
+    { title: 'Mathematical models', href: '/docs/model' },
+    { title: 'Theorems', href: '/docs/theory' },
+    { title: 'Best responses and checkers', href: '/docs/algorithm' },
+    { title: 'Floating-point arithmetic', href: '/docs/numerical' },
+  ] },
+  { title: 'Examples', items: [
+    { title: 'Rock-paper-scissors', href: '/docs/examples/rock-paper-scissors' },
+    { title: 'Finite static games', href: '/docs/model/static' },
+    { title: 'Left/Right', href: '/docs/examples/finite-state-left-right' },
+    { title: 'Classical HJB', href: '/docs/examples/hjb' },
+    { title: 'Population error bounds', href: '/docs/numerical/population' },
+  ] },
+  { title: 'Development', items: [
+    { title: 'Module organization', href: '/docs/architecture' },
+    { title: 'Verification and tests', href: '/docs/verification' },
+    { title: 'Contributing', href: '/docs/contributing' },
+    { title: 'Releases', href: '/docs/releases' },
+    { title: 'References', href: '/docs/references' },
+  ] },
 ] as const

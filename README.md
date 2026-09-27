@@ -29,7 +29,10 @@ Library warnings are treated as errors, including unfinished proofs using `sorry
 
 ## Documentation
 
-The official documentation is a Next.js + MDX site in `docs/`. Use the Node version in `.node-version`:
+Read the **[official documentation](https://varifold-lab.github.io/LeanMFG/)**.
+The site is built from `main` and published automatically through GitHub Pages.
+
+The Next.js + MDX source is in `docs/`. Use the Node version in `.node-version`:
 
 ```sh
 cd docs

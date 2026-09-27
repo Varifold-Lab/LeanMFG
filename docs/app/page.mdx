@@ -1,0 +1,35 @@
+import { DocumentationShell } from '@/components/DocumentationShell'
+
+<DocumentationShell>
+
+# LeanMFG documentation
+
+LeanMFG is a Lean 4 library for mean field games. It provides finite-horizon numerical solvers, mathematical models, and proofs for selected equilibrium and control problems.
+
+## Using the library
+
+[Install LeanMFG](/docs/getting-started) to run the numerical solvers or import its definitions into a Lean project. The [first solver example](/docs/quickstart) solves a Left/Right game and explains how to inspect the policy and exploitability history.
+
+```sh
+lake exe mfglib left_right omd 20
+```
+
+The [API reference](/docs/reference) documents the solver interface, options, result types, and population update. The [finite-horizon guide](/docs/computational) covers array layout, built-in environments, tuning, and compatibility with MFGLib.
+
+## Mathematical examples
+
+| Example | Model | Results |
+| --- | --- | --- |
+| [Rock-paper-scissors](/docs/examples/rock-paper-scissors) | Rational mixed strategies | Best response, equilibrium checker, unique uniform equilibrium |
+| [Finite static games](/docs/model/static) | Arbitrary finite nonempty action type | Pure-deviation characterization and an RPS adapter |
+| [Left/Right](/docs/examples/finite-state-left-right) | Rational one-step dynamics | Population conservation and equilibrium verification |
+| [Deterministic HJB](/docs/examples/hjb) | One-dimensional continuous control | Classical verification and an optimal feedback path |
+| [Population update](/docs/numerical/population) | Binary64 arrays | Coordinate error and mass-drift bounds |
+
+Numerical solver output is a floating-point approximation. The [verification guide](/docs/verification) lists the results covered by proofs and the checks applied to the numerical implementation.
+
+## Developing LeanMFG
+
+See [module organization](/docs/architecture) for the source layout, [contributing](/docs/contributing) for local commands and documentation conventions, and [releases](/docs/releases) for versioning and publication.
+
+</DocumentationShell>

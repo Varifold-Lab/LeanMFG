@@ -1,0 +1,81 @@
+import { Declaration } from '@/components/LeanSource'
+import { SourceLink } from '@/components/SourceLink'
+
+# Solver API
+
+Import `LeanMFG.Computational` and open the `LeanMFG.Computational` namespace. The entries below cover the common solver interface and population operations. Their signatures are read from the Lean source when this documentation is built.
+
+## Types and array layout
+
+`Policy`, `MeanField`, and `Vec` are aliases for `Array Float`. A policy stores action probabilities at each time and state. A mean field stores the joint state–action population at each time.
+
+Both arrays have `(T + 1) * nStates * nActions` entries. Actions vary fastest, followed by states and time. See [finite-horizon games](/docs/computational) for transition layout and terminal-time conventions.
+
+<Declaration name="OnlineMirrorDescent.solve" path="LeanMFG/Computational/Algorithms/Iterative.lean" start="def solve (cfg : OnlineMirrorDescent)" endBefore=" := do">
+
+Run Online Mirror Descent and retain the iteration history.
+
+| Parameter | Meaning |
+| --- | --- |
+| `cfg.alpha` | Positive finite step size. Default: `1`. |
+| `e` | Environment, including the initial distribution and callbacks. |
+| `pi0` | Initial policy. `none` selects the uniform policy. |
+| `options` | Iteration limit, stopping tolerances, and diagnostic output. |
+
+Returns `ExceptT String IO SolveResult`. Evaluate `.run` to obtain `IO (Except String SolveResult)`. Invalid step sizes, policies, or callback outputs produce an error. A nonfinite score during iteration also produces an error.
+
+The [first solver example](/docs/quickstart) shows a complete call and error handling.
+
+</Declaration>
+
+<Declaration name="SolveOptions" path="LeanMFG/Computational/Algorithms/Iterative.lean" start="structure SolveOptions where" endBefore="  deriving">
+
+`maxIter` limits the number of updates. The initial policy is stored at index zero. A run can therefore contain at most `maxIter + 1` policies.
+
+Early stopping is triggered when the current score satisfies
+
+$$e_k \leq \mathrm{atol} + \mathrm{rtol}\,e_0.$$
+
+Each `none` tolerance contributes zero. When both tolerances are absent or zero, early stopping is disabled. Tolerances must be finite and nonnegative. `verbose` sends progress messages to standard error every `printEvery` iterations, with an effective minimum interval of one.
+
+</Declaration>
+
+<Declaration name="SolveResult" path="LeanMFG/Computational/Algorithms/Iterative.lean" start="structure SolveResult where" endBefore="  deriving">
+
+The three arrays have corresponding indices. `runtimes` records cumulative seconds, with zero for the initial policy. `stoppedEarly` records tolerance-based termination.
+
+`SolveResult.bestIndex` returns the first index attaining the smallest recorded score. It is intended for solver-produced histories, which always contain an initial entry.
+
+</Declaration>
+
+<Declaration name="meanFieldFromPolicy" path="LeanMFG/Computational/Policy.lean" start="def meanFieldFromPolicy" endBefore=" := do">
+
+Compute the population induced by `pi`, starting from `e.mu0`. At each time, the state law is multiplied by the policy to form a joint state–action law. The transition callback supplies the next state law.
+
+Returns the full population flow or an error for invalid dimensions, probabilities, callback output, or nonfinite forward arithmetic. The numerical forward step uses the [checked population kernel](/docs/numerical/population).
+
+</Declaration>
+
+<Declaration name="exploitabilityScore" path="LeanMFG/Computational/QFn.lean" start="def exploitabilityScore (" endBefore=" := do">
+
+Compute the best-response value minus the policy value against the population induced by that policy.
+
+| Parameter | Meaning |
+| --- | --- |
+| `postprocess` | When true, clamp negative policy entries to zero and normalize each action row. When false, validate the supplied policy directly. |
+| `precision` | Optional cleanup threshold: a negative score whose absolute value is within this threshold is returned as zero. This does not provide an error bound. |
+
+The output is a numerical score. The [verification guide](/docs/verification) records which constituent computations have proved error bounds.
+
+</Declaration>
+
+## Other solvers
+
+Fictitious Play and Prior Descent use the same `e`, `pi0`, and `options` arguments. MFOMO and Occupation Measure Inclusion return the same history type and have additional algorithm-specific configuration.
+
+| Solver | Configuration and implementation |
+| --- | --- |
+| `FictitiousPlay.solve` | <SourceLink path="LeanMFG/Computational/Algorithms/Iterative.lean">FictitiousPlay</SourceLink> |
+| `PriorDescent.solve` | <SourceLink path="LeanMFG/Computational/Algorithms/Iterative.lean">PriorDescent</SourceLink> |
+| `MFOMO.solve` | <SourceLink path="LeanMFG/Computational/Algorithms/MFOMO.lean">MFOMO</SourceLink> |
+| `OccupationMeasureInclusion.solve` | <SourceLink path="LeanMFG/Computational/Algorithms/OccupationMeasure.lean">OccupationMeasureInclusion</SourceLink> |

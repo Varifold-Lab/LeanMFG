@@ -1,0 +1,57 @@
+import { RepositoryLink } from '@/components/SourceLink'
+
+# Contributing
+
+Work on a branch and open a pull request with the code, relevant checks, and documentation. The repository's <RepositoryLink path="CONTRIBUTING.md">contribution guide</RepositoryLink> describes module placement and licensing.
+
+## Check a library change
+
+```sh
+lake exe cache get
+lake build LeanMFG mfglib_check mfglib
+lake env lean scripts/Audit.lean
+lake exe mfglib_check
+```
+
+The [verification guide](/docs/verification) also lists the downstream-installation and release-metadata checks. State whether a change is supported by a general theorem, a numerical comparison, or an executable example.
+
+## Work on the documentation
+
+Use the Node version in `.node-version`. From the repository root:
+
+```sh
+cd docs
+npm ci
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000). Pages are MDX files under `docs/app/`. Navigation labels live in `docs/lib/navigation.ts`.
+
+```sh
+npm run build
+```
+
+The build checks TypeScript, MDX, repository links, and exported internal links. It also generates the search index and records the source commit. Set `NEXT_PUBLIC_BASE_PATH=/LeanMFG` to check the GitHub Pages path.
+
+## MDX components
+
+| Component | Use |
+| --- | --- |
+| `LeanSnippet` | Display a Lean source file, or an excerpt selected by unique markers. |
+| `Declaration` | Display a source-backed signature with parameters, results, and a source link. |
+| `Tabs` | Present alternative instructions, such as repository and package installation. |
+| `SourceLink` / `RepositoryLink` | Link to a file at the documentation's source commit. |
+
+Markdown code fences receive copy buttons. Section headings receive stable anchors and populate the page contents. Use native `details` and `summary` elements for supplementary assumptions or derivations; keep information needed to use an interface in the main text.
+
+Write each page around a reader's task. An API entry should explain its inputs, return value, errors, and an example. Place proposed work in issues; document available interfaces and their current limitations here.
+
+The documentation example is checked with:
+
+```sh
+lake env lean --run docs/examples/Solve.lean
+```
+
+## Release changes
+
+Record user-visible changes in the <RepositoryLink path="CHANGELOG.md">changelog</RepositoryLink>. The [release procedure](/docs/releases) covers candidate checks, tags, documentation artifacts, and publication.

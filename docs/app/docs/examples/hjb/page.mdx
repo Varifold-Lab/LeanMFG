@@ -1,8 +1,9 @@
 import { SourceLink } from '@/components/SourceLink'
+import { LeanSnippet } from '@/components/LeanSource'
 
 # Classical HJB verification
 
-This case formalizes a deterministic optimal-control component of continuous mean field game theory. It is separate from the finite rock-paper-scissors and Left/Right examples.
+This example proves optimality for a one-dimensional deterministic control problem with quadratic control cost. The general verification theorem assumes a classical HJB solution and integrability along admissible paths.
 
 ## Control problem
 
@@ -24,6 +25,20 @@ $$
 $$
 
 The <SourceLink path="LeanMFG/Verification/Continuous/HJB.lean">verification theorem</SourceLink> proves that a candidate satisfying this equation gives a lower bound on the cost of any admissible path. When a path follows the feedback `a=-∂ₓu`, its cost attains the bound and it is optimal. The general theorem states interval integrability of the value derivative along paths as an explicit hypothesis for the fundamental theorem of calculus.
+
+<details>
+<summary>Lean statement and hypotheses</summary>
+
+<LeanSnippet path="LeanMFG/Verification/Continuous/HJB.lean" start="theorem verification_optimal" endBefore=" := by" />
+
+`U` contains the smoothness, derivative, equation, and terminal-condition proofs.
+The two paths start from the same initial condition `z`. The hypotheses
+`hintγ` and `hintη` require interval integrability of the value derivative
+along each path; `hfeedback` requires the first path to follow the minimizing
+control throughout the interval. Under these hypotheses its cost is no greater
+than the second path's cost.
+
+</details>
 
 ## Quadratic example
 

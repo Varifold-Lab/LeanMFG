@@ -47,6 +47,8 @@ jobs:
         run: lake env lean scripts/Audit.lean | tee .artifacts/axioms.log
       - name: MFGLib numerical reference checks
         run: .lake/build/bin/mfglib_check | tee .artifacts/numerical.log
+      - name: Documentation Lean example
+        run: lake env lean --run docs/examples/Solve.lean | tee .artifacts/documentation-example.log
       - name: Install exact commit in a fresh client
         run: python3 scripts/check_downstream.py --revision "$GITHUB_SHA" | tee .artifacts/downstream.log
       - name: Source and lockfiles stayed fixed
