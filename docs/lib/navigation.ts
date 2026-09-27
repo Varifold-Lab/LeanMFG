@@ -20,6 +20,7 @@ export const documentation = [
     { title: 'Population error bounds', href: '/docs/numerical/population' },
   ] },
   { title: 'Development', items: [
+    { title: 'Community', href: '/docs/community' },
     { title: 'Module organization', href: '/docs/architecture' },
     { title: 'Verification and tests', href: '/docs/verification' },
     { title: 'Contributing', href: '/docs/contributing' },
