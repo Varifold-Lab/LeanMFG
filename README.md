@@ -28,3 +28,9 @@ See the [documentation](https://varifold-lab.github.io/LeanMFG/) for usage and
 - Xin Guo et al. [*MFGLib: A Library for Mean-Field Games*](https://arxiv.org/abs/2304.08630), 2023. [Code](https://github.com/radar-research-lab/MFGLib).
 
 Further references are listed in the [documentation](https://varifold-lab.github.io/LeanMFG/docs/references/).
+
+## Development plans
+
+- [From Chapter 3 to a computational MFG example](plans/chapter-3-computational-mfg.md):
+  a staged proposal for distribution distances, particle simulation, and solver guarantees.
+  See [tracking issue #7](https://github.com/Varifold-Lab/LeanMFG/issues/7) for tasks and contribution coordination.
