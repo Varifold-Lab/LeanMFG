@@ -57,7 +57,8 @@ jobs:
           GH_REPO: ${{ github.repository }}
           TAG: ${{ github.ref_name }}
         run: |
-          gh release create "$TAG" --verify-tag --title "LeanMFG $TAG" \
+          LEAN_VERSION=$(python3 -c 'import json; print(json.load(open("evidence/source.json"))["lean"].removeprefix("leanprover/lean4:v"))')
+          gh release create "$TAG" --verify-tag --title "LeanMFG $TAG — Lean $LEAN_VERSION" \
             --notes-file evidence/release-notes.md \
             evidence/source.json evidence/axioms.log evidence/numerical.log \
             evidence/downstream.log "leanmfg-docs-$TAG.tar.gz"

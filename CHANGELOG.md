@@ -5,6 +5,12 @@ is not a published release.
 
 ## [Unreleased]
 
+### Changed
+
+- Release titles now identify the required Lean version. The README records
+  tested release/dependency combinations, and the release guide explains
+  independent library versioning and the checks required for toolchain upgrades.
+
 ## [0.1.0] - 2026-09-27
 
 Initial release. Requires Lean 4.34.0 and the dependency revisions pinned in

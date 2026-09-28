@@ -40,14 +40,31 @@ repository. A new checkout or fork must configure them separately.
 
 ## Version policy
 
+LeanMFG versions independently of Lean: the library version identifies its
+features and interfaces, while the Lean version identifies the required
+toolchain. Multiple LeanMFG releases may use the same Lean version.
+
+Each published release specifies one tested combination of Lean, mathlib, and
+FloatLib. The <RepositoryLink path="README.md">README compatibility table</RepositoryLink>
+records these combinations. The pinned files and `source.json` release attachment
+provide the complete dependency revisions.
+
 - The package version in `lakefile.toml`, `docs/package.json`, and the root
   entries in `docs/package-lock.json` must agree: `MAJOR.MINOR.PATCH`.
-- During `0.x`, increment MINOR for breaking APIs or incompatible Lean/mathlib/
-  FloatLib changes. PATCH is for compatible fixes. Document theorem hypothesis
-  changes and numerical behavior changes even when names are unchanged.
+- During `0.x`, increment MINOR for substantial new features, breaking APIs, or
+  incompatible Lean/mathlib/FloatLib changes. PATCH is for compatible fixes.
+  Document theorem hypothesis changes and numerical behavior changes even when
+  names are unchanged.
 - Pin the Lean release, direct dependency commits, and complete Lake/npm locks.
   Toolchain compatibility is part of the release contract; do not promise
   arbitrary combinations of Lean dependencies.
+- Track stable Lean releases. Before publishing support for a new toolchain,
+  migrate the dependency set and pass the full candidate checks, including
+  numerical verification and fresh downstream installation. A newer Lean
+  release alone does not establish compatibility.
+- Include both versions in the GitHub Release title, for example
+  **LeanMFG v0.1.0 — Lean 4.34.0**. The release workflow derives the Lean version
+  from the verified `source.json` artifact; the Git tag remains `v0.1.0`.
 - Add user-visible changes under `CHANGELOG.md`'s Unreleased heading. Do not
   label unreleased work as a published version. Never move a published tag.
 
@@ -57,8 +74,10 @@ repository. A new checkout or fork must configure them separately.
    `## [X.Y.Z] - YYYY-MM-DD`, retaining an Unreleased heading. Include added
    capabilities, fixes, API changes, migration requirements, and known limitations.
 2. Update the [verification scope](/docs/verification), install instructions, and
-   relevant MDX pages. Run the [required checks](/docs/verification#required-checks)
-   and merge only after **CI gate** succeeds.
+   relevant MDX pages, and add the intended release's tested dependency set to
+   the README compatibility table. Run the
+   [required checks](/docs/verification#required-checks) and merge only after
+   **CI gate** succeeds.
 3. From `main`, run the **Release** workflow manually with candidate tag
    `vX.Y.Z`. Manual runs only validate and upload artifacts; they do not create
    tags, Releases, or Pages deployments.
