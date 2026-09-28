@@ -6,6 +6,20 @@
 LeanMFG is a Lean 4 library for mean field games, covering mathematical models,
 theory, algorithms, and formal verification.
 
+## Version compatibility
+
+LeanMFG has its own version number. Each release is tested with one pinned Lean
+toolchain and dependency set:
+
+| LeanMFG release | Lean | mathlib revision | FloatLib revision |
+| --- | --- | --- | --- |
+| [v0.1.0](https://github.com/Varifold-Lab/LeanMFG/releases/tag/v0.1.0) | `4.34.0` | [`5ed2965`](https://github.com/leanprover-community/mathlib4/commit/5ed2965256430c3649e86755f9576b54eca72435) | [`5f8218d`](https://github.com/lean-dojo/FloatLib/commit/5f8218dc571c01d6f8bd070c65bcd0de3a40b3c5) |
+
+Use the selected release's `lean-toolchain` and locked dependencies together.
+Release titles show both versions, for example **LeanMFG v0.1.0 — Lean 4.34.0**.
+See the [version policy](https://varifold-lab.github.io/LeanMFG/docs/releases/#version-policy)
+for toolchain upgrades and compatibility changes.
+
 ## Build
 
 Install [elan](https://github.com/leanprover/elan), then build the `v0.1.0` release:
